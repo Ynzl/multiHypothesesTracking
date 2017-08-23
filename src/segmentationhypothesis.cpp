@@ -140,6 +140,8 @@ void SegmentationHypothesis::addOutgoingConstraintToOpenGM(GraphicalModelType& m
 
 void SegmentationHypothesis::addDivisionConstraintToOpenGM(GraphicalModelType& model, bool requireSeparateChildren)
 {
+    std::cout << "ADDING DIVISION CONSTRAINT!" << std::endl;
+
 	if(division_.getOpenGMVariableId() < 0)
 		return;
 
@@ -287,7 +289,8 @@ void SegmentationHypothesis::addToOpenGMModel(
 	const std::vector<size_t>& detectionWeightIds,
 	const std::vector<size_t>& divisionWeightIds,
 	const std::vector<size_t>& appearanceWeightIds,
-	const std::vector<size_t>& disappearanceWeightIds)
+	const std::vector<size_t>& disappearanceWeightIds,
+    bool useDivisionConstraint)
 {
 	if(!settings)
 		throw std::runtime_error("Settings object cannot be nullptr");
@@ -310,7 +313,11 @@ void SegmentationHypothesis::addToOpenGMModel(
 
 	addIncomingConstraintToOpenGM(model);
 	addOutgoingConstraintToOpenGM(model);
-	addDivisionConstraintToOpenGM(model, settings->requireSeparateChildrenOfDivision_);
+    if(useDivisionConstraint)
+        addDivisionConstraintToOpenGM(model, settings->requireSeparateChildrenOfDivision_);
+    else
+        std::cout << "DON'T ADD DIVISION CONSTRAINT" << std::endl;
+
 	addExternalDivisionConstraintToOpenGM(model);
 
 	if(!settings->allowLengthOneTracks_)

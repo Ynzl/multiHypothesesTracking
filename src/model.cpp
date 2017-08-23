@@ -88,7 +88,7 @@ size_t Model::computeNumWeights()
 	return numDetWeights_ + numDivWeights_ + numAppWeights_ + numDisWeights_ + numExternalDivWeights_ + numLinkWeights_;
 }
 
-void Model::initializeOpenGMModel(WeightsType& weights)
+void Model::initializeOpenGMModel(WeightsType& weights, const std::vector<int>& useDivisionIDs)
 {
 	// make sure the numbers of features are initialized
 	computeNumWeights();
@@ -126,7 +126,24 @@ void Model::initializeOpenGMModel(WeightsType& weights)
 
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
-		iter->second.addToOpenGMModel(model_, weights, settings_, detWeightIds, divWeightIds, appWeightIds, disWeightIds);
+        bool useDivisionConstraint;
+        std::cout << "HI!" << std::endl;
+        if(useDivisionIDs.empty())
+        {
+            std::cout << "HI!" << std::endl;
+            useDivisionConstraint = false;
+        }
+        else if(useDivisionIDs[0] == -1)
+        {
+            std::cout << "ALL DIVISION CONSTRAINTS" << std::endl;
+            useDivisionConstraint = true;
+        }
+        else
+        {
+            std::cout << "HI!" << std::endl;
+            useDivisionConstraint = false;
+        }
+		iter->second.addToOpenGMModel(model_, weights, settings_, detWeightIds, divWeightIds, appWeightIds, disWeightIds, useDivisionConstraint);
 	}
 
 	for(auto iter = exclusionConstraints_.begin(); iter != exclusionConstraints_.end() ; ++iter)
@@ -142,7 +159,22 @@ void Model::initializeOpenGMModel(WeightsType& weights)
 	std::cout << "Model has " << numIndicatorVars << " indicator variables" << std::endl;
 }
 
-Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints)
+Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints)
+{
+    bool validSolution = false;
+    std::vector<int> useDivisionIDs = {};
+    unsigned int counter = 1;
+    while(!validSolution)
+    {
+        std::cout << "Iteration number " << counter << std::endl;
+        Solution solution = infer(weights, withIntegerConstraints, useDivisionIDs);
+        validSolution = verifySolution(solution);
+        ++counter;
+    }
+        
+}
+
+Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::vector<int>& useDivisionIDs)
 {
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
@@ -154,7 +186,8 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 	}
 	for(size_t i = 0; i < weights.size(); i++)
 		weightObject.setWeight(i, weights[i]);
-	initializeOpenGMModel(weightObject);
+
+    initializeOpenGMModel(weightObject, useDivisionIDs);
 
 	if(withIntegerConstraints)
 	{
