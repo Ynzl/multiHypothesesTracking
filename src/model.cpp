@@ -127,21 +127,21 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::vector<int>& 
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
         bool useDivisionConstraint;
-        std::cout << "HI!" << std::endl;
         if(useDivisionIDs.empty())
         {
-            std::cout << "HI!" << std::endl;
+            std::cout << "NO DIVISION CONSTRAINT USED" << std::endl;
             useDivisionConstraint = false;
         }
         else if(useDivisionIDs[0] == -1)
         {
-            std::cout << "ALL DIVISION CONSTRAINTS" << std::endl;
+            std::cout << "ALL DIVISION CONSTRAINTS USED" << std::endl;
             useDivisionConstraint = true;
         }
         else
         {
-            std::cout << "HI!" << std::endl;
-            useDivisionConstraint = false;
+            /**
+             * TODO: decide from useDivisionIDs
+             */
         }
 		iter->second.addToOpenGMModel(model_, weights, settings_, detWeightIds, divWeightIds, appWeightIds, disWeightIds, useDivisionConstraint);
 	}
@@ -164,14 +164,26 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
     bool validSolution = false;
     std::vector<int> useDivisionIDs = {};
     unsigned int counter = 1;
+
+    std::cout << "Iteration number " << counter << std::endl;
+    Solution solution = infer(weights, withIntegerConstraints, useDivisionIDs);
+    validSolution = verifySolution(solution);
+
+    /**
+     * TODO: get broken constraint IDs from verification and add them to useDivisionIDs
+     */
+
     while(!validSolution)
     {
-        std::cout << "Iteration number " << counter << std::endl;
-        Solution solution = infer(weights, withIntegerConstraints, useDivisionIDs);
+        solution = infer(weights, withIntegerConstraints, useDivisionIDs);
         validSolution = verifySolution(solution);
+        std::cout << "Iteration number " << counter << std::endl;
         ++counter;
     }
-        
+
+    std::cout << "FOUND IT!" << std::endl;
+
+    return solution;
 }
 
 Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::vector<int>& useDivisionIDs)
