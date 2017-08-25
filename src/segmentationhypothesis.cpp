@@ -316,7 +316,9 @@ void SegmentationHypothesis::addToOpenGMModel(
     if(useDivisionConstraint)
         addDivisionConstraintToOpenGM(model, settings->requireSeparateChildrenOfDivision_);
     else
-        std::cout << "DON'T ADD DIVISION CONSTRAINT" << std::endl;
+    {
+        // std::cout << "DON'T ADD DIVISION CONSTRAINT" << std::endl;
+    }
 
 	addExternalDivisionConstraintToOpenGM(model);
 

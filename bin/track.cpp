@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
         }
         else
         {
+            std::cout << "Relax on division constraint" << std::endl;
             Solution solution = model.relaxedInfer(weights, withIntegerConstraints);
             model.saveResultToJson(outputFilename, solution);
         }

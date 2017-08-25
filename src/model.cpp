@@ -161,27 +161,31 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::vector<int>& 
 
 Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints)
 {
-    bool validSolution = false;
+    bool valid = false;
     std::vector<int> useDivisionIDs = {};
     unsigned int counter = 1;
 
+    std::cout << "Solving without division constraints..." << std::endl;
+
     std::cout << "Iteration number " << counter << std::endl;
     Solution solution = infer(weights, withIntegerConstraints, useDivisionIDs);
-    validSolution = verifySolution(solution);
+    valid = verifySolution(solution);
+
+    std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
 
     /**
      * TODO: get broken constraint IDs from verification and add them to useDivisionIDs
      */
 
-    while(!validSolution)
-    {
-        solution = infer(weights, withIntegerConstraints, useDivisionIDs);
-        validSolution = verifySolution(solution);
-        std::cout << "Iteration number " << counter << std::endl;
-        ++counter;
-    }
+    // while(!valid)
+    // {
+    //     solution = infer(weights, withIntegerConstraints, useDivisionIDs);
+    //     valid = verifySolution(solution);
+    //     std::cout << "Iteration number " << counter << std::endl;
+    //     ++counter;
+    // }
 
-    std::cout << "FOUND IT!" << std::endl;
+    // std::cout << "FOUND IT!" << std::endl;
 
     return solution;
 }
