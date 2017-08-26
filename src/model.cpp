@@ -365,14 +365,20 @@ bool Model::verifySolution(const Solution& sol) const
 	}
 
 	// check that flow-conservation + division constraints are satisfied
+    // TODO list broken constraints
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
+        int invalidID = -1;
 		if(!iter->second.verifySolution(sol, settings_))
 		{
 			std::cout << "\tFound violated flow conservation constraint " << std::endl;
 			valid = false;
+            invalidID = iter->first;
+            // TODO add invaliID to list
 		}
 	}
+
+    // TODO: return list
 
 	return valid;
 }
