@@ -1,0 +1,98 @@
+{
+    "detectionResults": [
+        {
+            "id": 0,
+            "value": 1
+        },
+        {
+            "id": 1,
+            "value": 1
+        },
+        {
+            "id": 2,
+            "value": 1
+        },
+        {
+            "id": 3,
+            "value": 1
+        },
+        {
+            "id": 4,
+            "value": 1
+        },
+        {
+            "id": 5,
+            "value": 1
+        }
+    ],
+    "linkingResults": [
+        {
+            "src": 0,
+            "dest": 1,
+            "value": 1,
+            "gap": 1
+        },
+        {
+            "src": 1,
+            "dest": 2,
+            "value": 1,
+            "gap": 1
+        },
+        {
+            "src": 1,
+            "dest": 3,
+            "value": 1,
+            "gap": 1
+        },
+        {
+            "src": 2,
+            "dest": 4,
+            "value": 1,
+            "gap": 1
+        },
+        {
+            "src": 2,
+            "dest": 5,
+            "value": 0,
+            "gap": 1
+        },
+        {
+            "src": 3,
+            "dest": 4,
+            "value": 0,
+            "gap": 1
+        },
+        {
+            "src": 3,
+            "dest": 5,
+            "value": 1,
+            "gap": 1
+        }
+    ],
+    "divisionResults": [
+        {
+            "id": 0,
+            "value": false
+        },
+        {
+            "id": 1,
+            "value": true
+        },
+        {
+            "id": 2,
+            "value": false
+        },
+        {
+            "id": 3,
+            "value": false
+        },
+        {
+            "id": 4,
+            "value": false
+        },
+        {
+            "id": 5,
+            "value": false
+        }
+    ]
+}
