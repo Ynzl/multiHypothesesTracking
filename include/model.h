@@ -17,17 +17,17 @@ namespace mht
 
 /**
  * @brief The model holds all detections and their links, as well as exclusion constraints between detections
- * @detail WARNING: at the moment you can only run either learn or infer once on the model. 
+ * @detail WARNING: at the moment you can only run either learn or infer once on the model.
  * 		   Build a new one if you need it multiple times
  */
 class Model
 {
-public:	
+public:
 	/**
 	 * @return the number of weights which is estimated by checking how many features are given for detections, links and divisions
 	 */
 	size_t computeNumWeights();
-	
+
     /**
      * @brief Find the solution starting without division constraints and adding them gradually
      */
@@ -39,12 +39,12 @@ public:
 	 * @param withIntegerConstraints set to false if you just want the LP relaxation. Don't expect the solution to work in the rest of the code!
 	 * @return the vector of per-variable labels, can be used with the detection/linking hypotheses to query their state
 	 */
-	helpers::Solution infer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true, const std::vector<int>& divisionIDs = {-1});
+	helpers::Solution infer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true, const std::set<int>& divisionIDs = {-1});
 
 	/**
 	 * @brief Run learning using a given ground truth file and initial weights
 	 * @details Loads the ground truth using getGroundTruth() and learns the best weights using Structured Bundled Risk Minimization
-	 * @param weights 
+	 * @param weights
 	 * @return the vector of learned weights
 	 */
 	std::vector<helpers::ValueType> learn(const std::vector<helpers::ValueType>& weights);
@@ -52,7 +52,7 @@ public:
 	/**
 	 * @brief Run learning using a given ground truth file
 	 * @details Loads the ground truth using getGroundTruth() and learns the best weights using Structured Bundled Risk Minimization
-	 * 
+	 *
 	 * @return the vector of learned weights
 	 */
 	std::vector<helpers::ValueType> learn();
@@ -60,22 +60,25 @@ public:
 	/**
 	 * @brief check that the solution does not violate any constraints
 	 * @detail WARNING: may only be used after calling initializeOpenGMModel(), learn() or infer() because it needs an initialized opengm model!
-	 * 
+	 *
 	 * @param sol solution vector
 	 * @return boolean value describing whether this solution is valid
 	 */
 	bool verifySolution(const helpers::Solution& sol) const;
 
+    // TODO
+	bool verifySolution(const helpers::Solution& sol, std::set<int>& divisionIDs);
+
 	/**
 	 * @brief Return the energy of the given solution vector
 	 * @detail WARNING: may only be used after calling initializeOpenGMModel(), because it needs an initialized opengm model!
 	 * @detail WARNING: the weights object that the model refers to must still be available, as well!
-	 * 
+	 *
 	 * @param sol solution vector
 	 * @return energy of the system in this solution
 	 */
 	double evaluateSolution(const helpers::Solution& sol) const;
-	
+
 	/**
 	 * @brief Return the energy of the last found solution from tracking (zero by default)
 	 */
@@ -83,7 +86,7 @@ public:
 
 	/**
 	 * @brief Create a graphviz dot output of the full graph, showing used nodes/links in blue and exclusion constraints in red
-	 * 
+	 *
 	 * @param filename output filename
 	 * @param sol pointer to solution vector, if nullptr it will be ignored
 	 */
@@ -92,10 +95,10 @@ public:
 	/**
 	 * @brief Initialize the OpenGM model by adding variables, factors and constraints.
 	 * @detail This is called by learn() or infer()
-	 * 
-	 * @param weights a reference to the weights object that will be used in all 
+	 *
+	 * @param weights a reference to the weights object that will be used in all
 	 */
-	void initializeOpenGMModel(helpers::WeightsType& weights, const std::vector<int>& divisionIDs = {-1});
+	void initializeOpenGMModel(helpers::WeightsType& weights, const std::set<int>& divisionIDs = {-1});
 
 	/**
 	 * @return a vector of strings describing each entry in the weight vector

@@ -88,7 +88,7 @@ size_t Model::computeNumWeights()
 	return numDetWeights_ + numDivWeights_ + numAppWeights_ + numDisWeights_ + numExternalDivWeights_ + numLinkWeights_;
 }
 
-void Model::initializeOpenGMModel(WeightsType& weights, const std::vector<int>& divisionIDs)
+void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& divisionIDs)
 {
 	// make sure the numbers of features are initialized
 	computeNumWeights();
@@ -124,13 +124,14 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::vector<int>& 
 		iter->second->addToOpenGMModel(model_, weights, settings_->statesShareWeights_, externalDivWeightIds);
 	}
 
-    bool useDivisionConstraint;
+    bool useDivisionConstraint = false;
+    bool useSomeDivision = false;
     if(divisionIDs.empty())
     {
         std::cout << "NO DIVISION CONSTRAINT USED" << std::endl;
         useDivisionConstraint = false;
     }
-    else if(divisionIDs[0] == -1)
+    else if(divisionIDs.count(-1))
     {
         std::cout << "ALL DIVISION CONSTRAINTS USED" << std::endl;
         useDivisionConstraint = true;
@@ -138,16 +139,23 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::vector<int>& 
     else
     {
         std::cout << "SOME DIVISION CONSTRAINTS USED" << std::endl;
-        /**
-         * TODO: decide from divisionIDs
-         */
+        useSomeDivision = true;
     }
 
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
-        /**
-         * TODO: decide from divisionIDs
-         */
+        // std::cout << "Adding Segmentation Hypotheses with ID " << iter->first << std::endl;
+
+        if(useSomeDivision)
+        {
+            useDivisionConstraint = false;
+            if(divisionIDs.count(iter->first))
+            {
+                std::cout << "ADDING DIVISION CONSTRAINT FOR ID " << iter->first << std::endl;
+                useDivisionConstraint = true;
+            }
+        }
+
 		iter->second.addToOpenGMModel(model_, weights, settings_, detWeightIds, divWeightIds, appWeightIds, disWeightIds, useDivisionConstraint);
 	}
 
@@ -167,35 +175,49 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::vector<int>& 
 Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints)
 {
     bool valid = false;
-    std::vector<int> divisionIDs = {};
+    std::set<int> divisionIDs = {};
     unsigned int counter = 1;
 
     std::cout << "Solving without division constraints..." << std::endl;
 
     std::cout << "Iteration number " << counter << std::endl;
     Solution solution = infer(weights, withIntegerConstraints, divisionIDs);
-    valid = verifySolution(solution);
+    valid = verifySolution(solution, divisionIDs);
 
     std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
 
     /**
      * TODO: get broken constraint IDs from verification and add them to divisionIDs
+     * TODO implement loop
      */
 
     // while(!valid)
     // {
     //     solution = infer(weights, withIntegerConstraints, divisionIDs);
     //     valid = verifySolution(solution);
+    //     std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
     //     std::cout << "Iteration number " << counter << std::endl;
     //     ++counter;
     // }
 
-    // std::cout << "FOUND IT!" << std::endl;
+
+    std::cout << "BROKEN IDs" << std::endl;
+    // for(auto iter = divisionIDs.begin(); iter != divisionIDs.end(); ++iter)
+    for(auto iter : divisionIDs)
+    {
+        std::cout << iter << std::endl;
+    }
+
+    // solution = infer(weights, withIntegerConstraints, divisionIDs);
+    // valid = verifySolution(solution);
+    // std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
 
     return solution;
 }
 
-Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::vector<int>& divisionIDs)
+
+
+Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::set<int>& divisionIDs)
 {
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
@@ -259,7 +281,7 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 		OptimizerType::VerboseVisitorType optimizerVisitor;
 		optimizer.infer(optimizerVisitor);
 		optimizer.arg(solution);
-		
+
 		for(size_t i = 0; i < solution.size(); i++)
         {
             opengm::IndependentFactor<double, size_t, size_t> values;
@@ -271,7 +293,7 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
             }
             std::cout << std::endl;
         }
-		
+
 		std::cout << "solution has energy: " << optimizer.value() << std::endl;
 		foundSolutionValue_ = optimizer.value();
 		return solution;
@@ -299,7 +321,7 @@ std::vector<ValueType> Model::learn(const std::vector<helpers::ValueType>& weigh
 	{
 		initialWeights.setWeight(i, weights[i]);
 	}
-	
+
 	dataset.setWeights(initialWeights);
 	initializeOpenGMModel(dataset.getWeights());
 
@@ -307,7 +329,7 @@ std::vector<ValueType> Model::learn(const std::vector<helpers::ValueType>& weigh
 	Solution gt = getGroundTruth();
 
 	dataset.pushBackInstance(model_, gt);
-	
+
 	std::cout << "Done setting up dataset, creating learner" << std::endl;
 	opengm::learning::StructMaxMargin<DatasetType>::Parameter learnerParam;
 	learnerParam.optimizerParameter_.lambda = 1.00;
@@ -319,7 +341,7 @@ std::vector<ValueType> Model::learn(const std::vector<helpers::ValueType>& weigh
 #else
 	typedef opengm::LPGurobi2<GraphicalModelType, opengm::Minimizer> OptimizerType;
 #endif
-	
+
 	OptimizerType::Parameter optimizerParam;
 	optimizerParam.integerConstraintNodeVar_ = true;
 	optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
@@ -329,7 +351,7 @@ std::vector<ValueType> Model::learn(const std::vector<helpers::ValueType>& weigh
 	optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
 
 	std::cout << "Calling learn()..." << std::endl;
-	learner.learn<OptimizerType>(optimizerParam); 
+	learner.learn<OptimizerType>(optimizerParam);
 	std::cout << "extracting weights" << std::endl;
 	const WeightsType& finalWeights = learner.getWeights();
 	std::vector<double> resultWeights;
@@ -346,6 +368,40 @@ double Model::evaluateSolution(const Solution& sol) const
 double Model::getLastSolutionValue() const
 {
 	return foundSolutionValue_;
+}
+
+// version for division constraints
+bool Model::verifySolution(const helpers::Solution& sol, std::set<int>& divisionIDs)
+{
+	std::cout << "Checking solution..." << std::endl;
+
+	bool valid = true;
+
+	// check that all exclusions are obeyed
+	for(auto iter = exclusionConstraints_.begin(); iter != exclusionConstraints_.end() ; ++iter)
+	{
+		if(!iter->verifySolution(sol, segmentationHypotheses_))
+		{
+			std::cout << "\tFound violated exclusion constraint " << std::endl;
+			valid = false;
+		}
+	}
+
+	// check that flow-conservation + division constraints are satisfied
+	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
+	{
+		if(!iter->second.verifySolution(sol, settings_))
+		{
+			std::cout << "\tFound violated flow conservation constraint " << std::endl;
+			valid = false;
+
+            // TODO add invaliID to list
+            divisionIDs.insert(iter->first);
+		}
+	}
+
+
+	return valid;
 }
 
 bool Model::verifySolution(const Solution& sol) const
@@ -365,7 +421,6 @@ bool Model::verifySolution(const Solution& sol) const
 	}
 
 	// check that flow-conservation + division constraints are satisfied
-    // TODO list broken constraints
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
         int invalidID = -1;
@@ -374,11 +429,9 @@ bool Model::verifySolution(const Solution& sol) const
 			std::cout << "\tFound violated flow conservation constraint " << std::endl;
 			valid = false;
             invalidID = iter->first;
-            // TODO add invaliID to list
 		}
 	}
 
-    // TODO: return list
 
 	return valid;
 }
@@ -409,7 +462,7 @@ void Model::toDot(const std::string& filename, const Solution* sol) const
 	// exclusions
 	for(auto iter = exclusionConstraints_.begin(); iter != exclusionConstraints_.end() ; ++iter)
 		iter->toDot(out_file);
-	
+
     out_file << "}";
 }
 
