@@ -1,0 +1,65 @@
+{
+	"detectionResults" : 
+	[
+		{
+			"id" : 0,
+			"value" : 1
+		},
+		{
+			"id" : 1,
+			"value" : 1
+		},
+		{
+			"id" : 2,
+			"value" : 1
+		},
+		{
+			"id" : 3,
+			"value" : 1
+		},
+		{
+			"id" : 4,
+			"value" : 1
+		},
+		{
+			"id" : 5,
+			"value" : 1
+		}
+	],
+	"divisionResults" : 
+	[
+		{
+			"id" : 1,
+			"value" : true
+		}
+	],
+	"linkingResults" : 
+	[
+		{
+			"dest" : 1,
+			"src" : 0,
+			"value" : 1
+		},
+		{
+			"dest" : 2,
+			"src" : 1,
+			"value" : 1
+		},
+		{
+			"dest" : 3,
+			"src" : 1,
+			"value" : 1
+		},
+		{
+			"dest" : 4,
+			"src" : 2,
+			"value" : 1
+		},
+		{
+			"dest" : 5,
+			"src" : 3,
+			"value" : 1
+		}
+	],
+	"resultEnergy" : 232.39990141228637
+}
