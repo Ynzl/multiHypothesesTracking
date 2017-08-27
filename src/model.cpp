@@ -174,31 +174,23 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& div
 
 Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints)
 {
-    bool valid = false;
-    std::set<int> divisionIDs = {};
-    unsigned int divCount = 0;
-    unsigned int iterCount = 1;
+    std::cout << "Relax on division constraints..." << std::endl;
 
-    std::cout << "Iteration number " << iterCount << std::endl;
-    std::cout << "Solving without division constraints..." << std::endl;
-    Solution solution = infer(weights, withIntegerConstraints, divisionIDs);
-    valid = verifySolution(solution, divisionIDs);
+    std::set<int> divisionIDs = {};
+    unsigned int iterCount = 0;
+    unsigned int divCount = 0;
     unsigned int divCountNew = divisionIDs.size();
 
-    std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
+    bool valid = false;
+    Solution solution;
 
-    /**
-     * TODO: get broken constraint IDs from verification and add them to divisionIDs
-     * TODO implement loop
-     */
-
-    while(!valid && divCountNew > divCount)
+    do
     {
         ++iterCount;
         divCount = divCountNew;
 
         std::cout << "Iteration number " << iterCount << std::endl;
-        std::cout << "Division Consrtaint IDs: " << std::endl;
+        std::cout << "Use Division Constraint IDs: " << std::endl;
         for(auto iter : divisionIDs)
         {
             std::cout << iter << ", ";
@@ -206,11 +198,16 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
         std::cout << std::endl;
 
         solution = infer(weights, withIntegerConstraints, divisionIDs);
-        valid = verifySolution(solution);
+        valid = verifySolution(solution, divisionIDs);
         divCountNew = divisionIDs.size();
+
+        std::cout << "divCount: " << divCount << std::endl;
+        std::cout << "divCountNew: " << divCountNew << std::endl;
 
         std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
     }
+    while(!valid && divCountNew > divCount);
+
 
     std::cout << "Number of iterations: " << iterCount << std::endl;
     std::cout << "Found valid solution? " << (valid? "yes" : "no") << std::endl;
