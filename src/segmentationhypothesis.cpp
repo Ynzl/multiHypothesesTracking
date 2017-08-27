@@ -140,8 +140,6 @@ void SegmentationHypothesis::addOutgoingConstraintToOpenGM(GraphicalModelType& m
 
 void SegmentationHypothesis::addDivisionConstraintToOpenGM(GraphicalModelType& model, bool requireSeparateChildren)
 {
-    std::cout << "ADDING DIVISION CONSTRAINT!" << std::endl;
-
 	if(division_.getOpenGMVariableId() < 0)
 		return;
 
@@ -316,12 +314,8 @@ void SegmentationHypothesis::addToOpenGMModel(
 
     if(useDivisionConstraint)
     {
-        // std::cout << "ADDIND DIVISION CONSTRAINT" << std::endl;
+        // std::cout << "ADDING DIVISION CONSTRAINT!" << std::endl;
         addDivisionConstraintToOpenGM(model, settings->requireSeparateChildrenOfDivision_);
-    }
-    else
-    {
-        // std::cout << "DON'T ADD DIVISION CONSTRAINT" << std::endl;
     }
 
 	addExternalDivisionConstraintToOpenGM(model);

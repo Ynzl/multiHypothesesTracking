@@ -128,7 +128,7 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& div
     bool useSomeDivision = false;
     if(divisionIDs.empty())
     {
-        std::cout << "NO DIVISION CONSTRAINT USED" << std::endl;
+        std::cout << "NO DIVISION CONSTRAINTS USED" << std::endl;
         useDivisionConstraint = false;
     }
     else if(divisionIDs.count(-1))
@@ -176,13 +176,14 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
 {
     bool valid = false;
     std::set<int> divisionIDs = {};
-    unsigned int counter = 1;
+    unsigned int divCount = 0;
+    unsigned int iterCount = 1;
 
+    std::cout << "Iteration number " << iterCount << std::endl;
     std::cout << "Solving without division constraints..." << std::endl;
-
-    std::cout << "Iteration number " << counter << std::endl;
     Solution solution = infer(weights, withIntegerConstraints, divisionIDs);
     valid = verifySolution(solution, divisionIDs);
+    unsigned int divCountNew = divisionIDs.size();
 
     std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
 
@@ -191,26 +192,28 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
      * TODO implement loop
      */
 
-    // while(!valid)
-    // {
-    //     solution = infer(weights, withIntegerConstraints, divisionIDs);
-    //     valid = verifySolution(solution);
-    //     std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
-    //     std::cout << "Iteration number " << counter << std::endl;
-    //     ++counter;
-    // }
-
-
-    std::cout << "BROKEN IDs" << std::endl;
-    // for(auto iter = divisionIDs.begin(); iter != divisionIDs.end(); ++iter)
-    for(auto iter : divisionIDs)
+    while(!valid && divCountNew > divCount)
     {
-        std::cout << iter << std::endl;
+        ++iterCount;
+        divCount = divCountNew;
+
+        std::cout << "Iteration number " << iterCount << std::endl;
+        std::cout << "Division Consrtaint IDs: " << std::endl;
+        for(auto iter : divisionIDs)
+        {
+            std::cout << iter << ", ";
+        }
+        std::cout << std::endl;
+
+        solution = infer(weights, withIntegerConstraints, divisionIDs);
+        valid = verifySolution(solution);
+        divCountNew = divisionIDs.size();
+
+        std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
     }
 
-    // solution = infer(weights, withIntegerConstraints, divisionIDs);
-    // valid = verifySolution(solution);
-    // std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
+    std::cout << "Number of iterations: " << iterCount << std::endl;
+    std::cout << "Found valid solution? " << (valid? "yes" : "no") << std::endl;
 
     return solution;
 }
