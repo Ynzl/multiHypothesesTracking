@@ -128,17 +128,17 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& div
     bool useSomeDivision = false;
     if(divisionIDs.empty())
     {
-        std::cout << "NO DIVISION CONSTRAINTS USED" << std::endl;
+        std::cout << "No division constraints used" << std::endl;
         useDivisionConstraint = false;
     }
     else if(divisionIDs.count(-1))
     {
-        std::cout << "ALL DIVISION CONSTRAINTS USED" << std::endl;
+        std::cout << "All division constraints used" << std::endl;
         useDivisionConstraint = true;
     }
     else
     {
-        std::cout << "SOME DIVISION CONSTRAINTS USED" << std::endl;
+        std::cout << divisionIDs.size() << " division constraints used" << std::endl;
         useSomeDivision = true;
     }
 
@@ -151,7 +151,7 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& div
             useDivisionConstraint = false;
             if(divisionIDs.count(iter->first))
             {
-                std::cout << "ADDING DIVISION CONSTRAINT FOR ID " << iter->first << std::endl;
+                // std::cout << "ADDING DIVISION CONSTRAINT FOR ID " << iter->first << std::endl;
                 useDivisionConstraint = true;
             }
         }
