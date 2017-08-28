@@ -30,35 +30,79 @@ int main(int argc, char** argv) {
 	po::store(po::parse_command_line(argc, argv, description), variableMap);
 	po::notify(variableMap);
 
-	if (variableMap.count("help")) 
+	if (variableMap.count("help"))
 	{
 	    std::cout << description << std::endl;
 	    return 1;
 	}
 
-	if (!variableMap.count("model") || !variableMap.count("output") || !variableMap.count("weights")) 
+	if (!variableMap.count("model") || !variableMap.count("output") || !variableMap.count("weights"))
 	{
 	    std::cout << "Model, Weights and Output filenames have to be specified!" << std::endl;
 	    std::cout << description << std::endl;
-	} 
-	else 
+	}
+	else
 	{
 		bool withIntegerConstraints = variableMap.count("lp-relax") == 0;
 		bool withAllDivisionConstraints = variableMap.count("relax-division-constraints") == 0;
-	    JsonModel model;
-		model.readFromJson(modelFilename);
-		std::vector<double> weights = readWeightsFromJson(weightsFilename);
+
+
         if(withAllDivisionConstraints)
         {
+            JsonModel model;
+            model.readFromJson(modelFilename);
+            std::vector<double> weights = readWeightsFromJson(weightsFilename);
             Solution solution = model.infer(weights, withIntegerConstraints);
             model.saveResultToJson(outputFilename, solution);
         }
         else
         {
-            Solution solution = model.relaxedInfer(weights, withIntegerConstraints);
-            model.saveResultToJson(outputFilename, solution);
-        }
-            
 
+            std::cout << "Relax on division constraints..." << std::endl;
+
+            std::set<int> divisionIDs = {};
+            unsigned int iterCount = 0;
+            unsigned int divCount = 0;
+            unsigned int divCountNew = divisionIDs.size();
+
+            bool valid = false;
+            Solution solution = {};
+
+            do
+            {
+                solution = {};
+
+                ++iterCount;
+                divCount = divCountNew;
+
+                JsonModel model;
+                model.readFromJson(modelFilename);
+                std::vector<double> weights = readWeightsFromJson(weightsFilename);
+
+                std::cout << "Iteration number " << iterCount << std::endl;
+                std::cout << "Use Division Constraint IDs: " << std::endl;
+                for(auto iter : divisionIDs)
+                {
+                    std::cout << iter << ", ";
+                }
+                std::cout << std::endl;
+
+                solution = model.infer(weights, withIntegerConstraints, divisionIDs);
+                valid = model.verifySolution(solution, divisionIDs);
+                divCountNew = divisionIDs.size();
+
+                std::cout << "divCount: " << divCount << std::endl;
+                std::cout << "divCountNew: " << divCountNew << std::endl;
+
+                std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
+            }
+            while(!valid && divCountNew > divCount);
+
+
+            std::cout << "Number of iterations: " << iterCount << std::endl;
+            std::cout << "Found valid solution? " << (valid? "yes" : "no") << std::endl;
+
+            // model.saveResultToJson(outputFilename, solution);
+        }
 	}
 }
