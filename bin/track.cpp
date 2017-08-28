@@ -95,6 +95,9 @@ int main(int argc, char** argv) {
                 std::cout << "divCountNew: " << divCountNew << std::endl;
 
                 std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
+
+                if(valid)
+                    model.saveResultToJson(outputFilename, solution);
             }
             while(!valid && divCountNew > divCount);
 
