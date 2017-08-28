@@ -82,7 +82,7 @@ public: // API
 		const std::vector<size_t>& divisionWeightIds = {},
 		const std::vector<size_t>& appearanceWeightIds = {},
 		const std::vector<size_t>& disappearanceWeightIds = {},
-        bool useDivisionConstraint=true);
+        bool useDivisionConstraint = true);
 
 	/**
 	 * @brief Add an incoming link to this node as hypothesis. Will be considered in conservation constraints

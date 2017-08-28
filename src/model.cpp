@@ -172,6 +172,7 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& div
 	std::cout << "Model has " << numIndicatorVars << " indicator variables" << std::endl;
 }
 
+
 Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints)
 {
     std::cout << "Relax on division constraints..." << std::endl;
@@ -182,10 +183,13 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
     unsigned int divCountNew = divisionIDs.size();
 
     bool valid = false;
-    Solution solution;
+    // TODO maybe use pointer
+    Solution solution = {};
 
     do
     {
+        solution = {};
+
         ++iterCount;
         divCount = divCountNew;
 

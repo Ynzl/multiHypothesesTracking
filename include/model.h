@@ -66,7 +66,10 @@ public:
 	 */
 	bool verifySolution(const helpers::Solution& sol) const;
 
-    // TODO
+    /**
+     * @brief check that the solution does not violate any constraints, save the IDs of segmentationHypothesis in which constraints are broken
+     * @detail used by relaxedInfer
+     */
 	bool verifySolution(const helpers::Solution& sol, std::set<int>& divisionIDs);
 
 	/**
