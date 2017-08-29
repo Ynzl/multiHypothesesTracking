@@ -391,6 +391,8 @@ bool Model::verifySolution(const helpers::Solution& sol, std::set<int>& division
 		}
 	}
 
+    unsigned int divisionCount = 0;
+
 	// check that flow-conservation + division constraints are satisfied
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
@@ -399,11 +401,16 @@ bool Model::verifySolution(const helpers::Solution& sol, std::set<int>& division
 			std::cout << "\tFound violated flow conservation constraint " << std::endl;
 			valid = false;
 
-            // TODO add invaliID to list
             divisionIDs.insert(iter->first);
 		}
+
+        if(iter->second.getDivisionVariable().getOpenGMVariableId() > 0)
+        {
+            divisionCount += sol[iter->second.getDivisionVariable().getOpenGMVariableId()];
+        }
 	}
 
+    std::cout << "Divisions: " << divisionCount << std::endl;
 
 	return valid;
 }
@@ -424,18 +431,23 @@ bool Model::verifySolution(const Solution& sol) const
 		}
 	}
 
+    unsigned int divisionCount = 0;
 	// check that flow-conservation + division constraints are satisfied
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
-        int invalidID = -1;
 		if(!iter->second.verifySolution(sol, settings_))
 		{
 			std::cout << "\tFound violated flow conservation constraint " << std::endl;
 			valid = false;
-            invalidID = iter->first;
 		}
+
+        if(iter->second.getDivisionVariable().getOpenGMVariableId() > 0)
+        {
+            divisionCount += sol[iter->second.getDivisionVariable().getOpenGMVariableId()];
+        }
 	}
 
+    std::cout << "Divisions: " << divisionCount << std::endl;
 
 	return valid;
 }
