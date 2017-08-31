@@ -143,6 +143,8 @@ void SegmentationHypothesis::addDivisionConstraintToOpenGM(GraphicalModelType& m
 	if(division_.getOpenGMVariableId() < 0)
 		return;
 
+    // std::cout << "ADDING DIVISION CONSTRAINT!" << std::endl;
+
 	// add constraint for sum of ougoing = this label + division
 	LinearConstraintFunctionType::LinearConstraintType divisionConstraint;
 	std::vector<LabelType> factorVariables;

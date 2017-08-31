@@ -175,34 +175,40 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& div
 
 Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints)
 {
-    std::cout << "Relax on division constraints..." << std::endl;
+    // std::cout << "Relax on division constraints..." << std::endl;
 
     std::set<int> divisionIDs = {};
-    unsigned int iterCount = 0;
+    std::set<int> newDivisionIDs = {};
+    unsigned int iterCount = 1;
     unsigned int divCount = 0;
-    unsigned int divCountNew = divisionIDs.size();
+    unsigned int divCountNew = 0;
 
-    bool valid = false;
-    // TODO maybe use pointer
-    Solution solution = {};
+    std::cout << "Iteration number 1: Solving without any division constraints..." << std::endl;
+    Solution solution = infer(weights, withIntegerConstraints, divisionIDs);
+    bool valid = verifySolution(solution, newDivisionIDs);
 
-    do
+    divisionIDs = newDivisionIDs;
+    divCountNew = divisionIDs.size();
+
+    std::cout << "divCount: " << divCount << std::endl;
+    std::cout << "divCountNew: " << divCountNew << std::endl;
+
+    std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
+
+
+    while(!valid && divCountNew > divCount)
     {
-        solution = {};
-
         ++iterCount;
-        divCount = divCountNew;
-
+        divCount = divisionIDs.size();
+        solution = {};
         std::cout << "Iteration number " << iterCount << std::endl;
-        std::cout << "Use Division Constraint IDs: " << std::endl;
-        for(auto iter : divisionIDs)
-        {
-            std::cout << iter << ", ";
-        }
-        std::cout << std::endl;
 
-        solution = infer(weights, withIntegerConstraints, divisionIDs);
-        valid = verifySolution(solution, divisionIDs);
+        solution = miniInfer(weights, withIntegerConstraints, newDivisionIDs);
+
+        newDivisionIDs = {};
+        valid = verifySolution(solution, newDivisionIDs);
+
+        divisionIDs.insert(newDivisionIDs.begin(), newDivisionIDs.end());
         divCountNew = divisionIDs.size();
 
         std::cout << "divCount: " << divCount << std::endl;
@@ -210,7 +216,6 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
 
         std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
     }
-    while(!valid && divCountNew > divCount);
 
 
     std::cout << "Number of iterations: " << iterCount << std::endl;
@@ -220,6 +225,94 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
 }
 
 
+Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::set<int>& divisionIDs)
+{
+	// use weights that were given
+	WeightsType weightObject(computeNumWeights());
+	assert(weights.size() == weightObject.numberOfWeights());
+	if(weights.size() != weightObject.numberOfWeights())
+	{
+		std::cout << "Provided length of vector with initial weights has wrong length!" << std::endl;
+		throw std::runtime_error("Provided length of vector with initial weights has wrong length!");
+	}
+	for(size_t i = 0; i < weights.size(); i++)
+		weightObject.setWeight(i, weights[i]);
+
+    std::cout << "Add Division Constraint IDs: " << std::endl;
+    for(auto iter : divisionIDs)
+    {
+        std::cout << iter << ", ";
+        // segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
+    }
+    std::cout << std::endl;
+
+	if(withIntegerConstraints)
+	{
+#ifdef WITH_CPLEX
+		std::cout << "Using cplex optimizer" << std::endl;
+		typedef opengm::LPCplex2<GraphicalModelType, opengm::Minimizer> OptimizerType;
+#else
+		std::cout << "Using gurobi optimizer" << std::endl;
+		typedef opengm::LPGurobi2<GraphicalModelType, opengm::Minimizer> OptimizerType;
+#endif
+
+		OptimizerType::Parameter optimizerParam;
+		optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
+		optimizerParam.verbose_ = settings_->optimizerVerbose_;
+		optimizerParam.useSoftConstraints_ = false;
+		optimizerParam.integerConstraintNodeVar_ = true;
+		optimizerParam.epGap_ = settings_->optimizerEpGap_;
+		optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
+
+		OptimizerType optimizer(model_, optimizerParam);
+
+		Solution solution(model_.numberOfVariables());
+		OptimizerType::VerboseVisitorType optimizerVisitor;
+		optimizer.infer(optimizerVisitor);
+		optimizer.arg(solution);
+		std::cout << "solution has energy: " << optimizer.value() << std::endl;
+		foundSolutionValue_ = optimizer.value();
+		return solution;
+	}
+	else
+	{
+#ifdef WITH_CPLEX
+		std::cout << "Using cplex optimizer" << std::endl;
+		typedef opengm::LPCplex<GraphicalModelType, opengm::Minimizer> OptimizerType;
+#else
+		std::cout << "Using gurobi optimizer" << std::endl;
+		typedef opengm::LPGurobi<GraphicalModelType, opengm::Minimizer> OptimizerType;
+#endif
+		OptimizerType::Parameter optimizerParam;
+		optimizerParam.verbose_ = settings_->optimizerVerbose_;
+		optimizerParam.integerConstraint_ = true;
+		optimizerParam.epGap_ = settings_->optimizerEpGap_;
+		optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
+
+		OptimizerType optimizer(model_, optimizerParam);
+
+		Solution solution(model_.numberOfVariables());
+		OptimizerType::VerboseVisitorType optimizerVisitor;
+		optimizer.infer(optimizerVisitor);
+		optimizer.arg(solution);
+
+		for(size_t i = 0; i < solution.size(); i++)
+        {
+            opengm::IndependentFactor<double, size_t, size_t> values;
+            optimizer.variable(i, values);
+            std::cout << "Variable " << i << ": ";
+            for(size_t state = 0; state < model_.numberOfLabels(i); state++)
+            {
+                std::cout << "(" << state << ")=" << values(state) << " ";
+            }
+            std::cout << std::endl;
+        }
+
+		std::cout << "solution has energy: " << optimizer.value() << std::endl;
+		foundSolutionValue_ = optimizer.value();
+		return solution;
+	}
+}
 
 Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::set<int>& divisionIDs)
 {
@@ -404,7 +497,7 @@ bool Model::verifySolution(const helpers::Solution& sol, std::set<int>& division
             divisionIDs.insert(iter->first);
 		}
 
-        if(iter->second.getDivisionVariable().getOpenGMVariableId() > 0)
+        if(iter->second.getDivisionVariable().getOpenGMVariableId() >= 0)
         {
             divisionCount += sol[iter->second.getDivisionVariable().getOpenGMVariableId()];
         }
@@ -441,7 +534,7 @@ bool Model::verifySolution(const Solution& sol) const
 			valid = false;
 		}
 
-        if(iter->second.getDivisionVariable().getOpenGMVariableId() > 0)
+        if(iter->second.getDivisionVariable().getOpenGMVariableId() >= 0)
         {
             divisionCount += sol[iter->second.getDivisionVariable().getOpenGMVariableId()];
         }

@@ -33,6 +33,8 @@ public:
      */
 	helpers::Solution relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true);
 
+	helpers::Solution miniInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true, const std::set<int>& divisionIDs = {-1});
+
 	/**
 	 * @brief Find the minimal-energy configuration using an ILP
 	 * @param weights a vector of weights to use

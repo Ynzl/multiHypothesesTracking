@@ -138,6 +138,12 @@ public: // API
 	 */
 	size_t getNumActiveOutgoingLinks(const helpers::Solution& sol) const;
 
+
+	void addDivisionConstraint(helpers::GraphicalModelType& model, bool requireSeparateChildren)
+    {
+        return addDivisionConstraintToOpenGM(model, requireSeparateChildren);
+    }
+
 private:
 	/**
 	 * @brief Add incoming constraints to OpenGM
