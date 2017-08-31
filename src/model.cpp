@@ -242,7 +242,7 @@ Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntege
     for(auto iter : divisionIDs)
     {
         std::cout << iter << ", ";
-        // segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
+        segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
     }
     std::cout << std::endl;
 
