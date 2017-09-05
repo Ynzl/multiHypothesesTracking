@@ -57,55 +57,7 @@ int main(int argc, char** argv) {
         }
         else
         {
-
             std::cout << "Relax on division constraints..." << std::endl;
-
-            // std::set<int> divisionIDs = {};
-            // unsigned int iterCount = 0;
-            // unsigned int divCount = 0;
-            // unsigned int divCountNew = divisionIDs.size();
-
-            // bool valid = false;
-            // Solution solution = {};
-
-            // do
-            // {
-            //     solution = {};
-
-            //     ++iterCount;
-            //     divCount = divCountNew;
-
-            //     JsonModel model;
-            //     model.readFromJson(modelFilename);
-            //     std::vector<double> weights = readWeightsFromJson(weightsFilename);
-
-            //     std::cout << "Iteration number " << iterCount << std::endl;
-            //     std::cout << "Use Division Constraint IDs: " << std::endl;
-            //     for(auto iter : divisionIDs)
-            //     {
-            //         std::cout << iter << ", ";
-            //     }
-            //     std::cout << std::endl;
-
-            //     solution = model.infer(weights, withIntegerConstraints, divisionIDs);
-            //     valid = model.verifySolution(solution, divisionIDs);
-            //     divCountNew = divisionIDs.size();
-
-            //     std::cout << "divCount: " << divCount << std::endl;
-            //     std::cout << "divCountNew: " << divCountNew << std::endl;
-
-            //     std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
-
-            //     if(valid)
-            //         model.saveResultToJson(outputFilename, solution);
-            // }
-            // while(!valid && divCountNew > divCount);
-
-
-            // std::cout << "Number of iterations: " << iterCount << std::endl;
-            // std::cout << "Found valid solution? " << (valid? "yes" : "no") << std::endl;
-            //
-            // // model.saveResultToJson(outputFilename, solution);
 
             JsonModel model;
             model.readFromJson(modelFilename);

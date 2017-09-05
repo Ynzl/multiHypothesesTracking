@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <numeric>
 #include <sstream>
+#include <chrono>
+#include <ctime>
 
 // include the LPDef symbols only once!
 #undef OPENGM_LPDEF_NO_SYMBOLS
@@ -200,10 +202,10 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
     {
         ++iterCount;
         divCount = divisionIDs.size();
-        solution = {};
+        // solution = {};
         std::cout << "Iteration number " << iterCount << std::endl;
 
-        solution = miniInfer(weights, withIntegerConstraints, newDivisionIDs);
+        solution = inferWithNewConstraints(weights, withIntegerConstraints, newDivisionIDs);
 
         newDivisionIDs = {};
         valid = verifySolution(solution, newDivisionIDs);
@@ -225,7 +227,7 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
 }
 
 
-Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::set<int>& divisionIDs)
+Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::set<int>& divisionIDs)
 {
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
@@ -238,13 +240,15 @@ Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntege
 	for(size_t i = 0; i < weights.size(); i++)
 		weightObject.setWeight(i, weights[i]);
 
-    std::cout << "Add Division Constraint IDs: " << std::endl;
+    std::cout << "Add " << divisionIDs.size() << " Division Constraints with IDs: " << std::endl;
     for(auto iter : divisionIDs)
     {
         std::cout << iter << ", ";
         segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
     }
     std::cout << std::endl;
+
+    std::chrono::time_point<std::chrono::system_clock> start, end;
 
 	if(withIntegerConstraints)
 	{
@@ -255,7 +259,6 @@ Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntege
 		std::cout << "Using gurobi optimizer" << std::endl;
 		typedef opengm::LPGurobi2<GraphicalModelType, opengm::Minimizer> OptimizerType;
 #endif
-
 		OptimizerType::Parameter optimizerParam;
 		optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
 		optimizerParam.verbose_ = settings_->optimizerVerbose_;
@@ -268,10 +271,18 @@ Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntege
 
 		Solution solution(model_.numberOfVariables());
 		OptimizerType::VerboseVisitorType optimizerVisitor;
+
+        start = std::chrono::system_clock::now();
 		optimizer.infer(optimizerVisitor);
+        end = std::chrono::system_clock::now();
+
 		optimizer.arg(solution);
 		std::cout << "solution has energy: " << optimizer.value() << std::endl;
 		foundSolutionValue_ = optimizer.value();
+
+        std::chrono::duration<double> solve_time = end - start;
+        std::cout << "Solving time: " << solve_time.count() << std::endl;
+
 		return solution;
 	}
 	else
@@ -293,7 +304,11 @@ Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntege
 
 		Solution solution(model_.numberOfVariables());
 		OptimizerType::VerboseVisitorType optimizerVisitor;
+
+        start = std::chrono::system_clock::now();
 		optimizer.infer(optimizerVisitor);
+        end = std::chrono::system_clock::now();
+
 		optimizer.arg(solution);
 
 		// for(size_t i = 0; i < solution.size(); i++)
@@ -310,6 +325,10 @@ Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntege
 
 		std::cout << "solution has energy: " << optimizer.value() << std::endl;
 		foundSolutionValue_ = optimizer.value();
+
+        std::chrono::duration<double> solve_time = end - start;
+        std::cout << "Solving time: " << solve_time.count() << std::endl;
+
 		return solution;
 	}
 }
@@ -328,6 +347,8 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 		weightObject.setWeight(i, weights[i]);
 
     initializeOpenGMModel(weightObject, divisionIDs);
+
+    std::chrono::time_point<std::chrono::system_clock> start, end;
 
 	if(withIntegerConstraints)
 	{
@@ -351,10 +372,18 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 
 		Solution solution(model_.numberOfVariables());
 		OptimizerType::VerboseVisitorType optimizerVisitor;
+
+        start = std::chrono::system_clock::now();
 		optimizer.infer(optimizerVisitor);
+        end = std::chrono::system_clock::now();
+
 		optimizer.arg(solution);
 		std::cout << "solution has energy: " << optimizer.value() << std::endl;
 		foundSolutionValue_ = optimizer.value();
+
+        std::chrono::duration<double> solve_time = end - start;
+        std::cout << "Solving time: " << solve_time.count() << std::endl;
+
 		return solution;
 	}
 	else
@@ -368,7 +397,7 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 #endif
 		OptimizerType::Parameter optimizerParam;
 		optimizerParam.verbose_ = settings_->optimizerVerbose_;
-		optimizerParam.integerConstraint_ = true;
+		optimizerParam.integerConstraint_ = false;
 		optimizerParam.epGap_ = settings_->optimizerEpGap_;
 		optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
 
@@ -376,7 +405,11 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 
 		Solution solution(model_.numberOfVariables());
 		OptimizerType::VerboseVisitorType optimizerVisitor;
+
+        start = std::chrono::system_clock::now();
 		optimizer.infer(optimizerVisitor);
+        end = std::chrono::system_clock::now();
+
 		optimizer.arg(solution);
 
 		// for(size_t i = 0; i < solution.size(); i++)
@@ -393,6 +426,10 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 
 		std::cout << "solution has energy: " << optimizer.value() << std::endl;
 		foundSolutionValue_ = optimizer.value();
+
+        std::chrono::duration<double> solve_time = end - start;
+        std::cout << "Solving time: " << solve_time.count() << std::endl;
+
 		return solution;
 	}
 }
