@@ -90,7 +90,7 @@ size_t Model::computeNumWeights()
 	return numDetWeights_ + numDivWeights_ + numAppWeights_ + numDisWeights_ + numExternalDivWeights_ + numLinkWeights_;
 }
 
-void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& divisionIDs)
+void Model::initializeOpenGMModel(WeightsType& weights, bool withDivisionConstraints)
 {
 	// make sure the numbers of features are initialized
 	computeNumWeights();
@@ -126,39 +126,18 @@ void Model::initializeOpenGMModel(WeightsType& weights, const std::set<int>& div
 		iter->second->addToOpenGMModel(model_, weights, settings_->statesShareWeights_, externalDivWeightIds);
 	}
 
-    bool useDivisionConstraint = false;
-    bool useSomeDivision = false;
-    if(divisionIDs.empty())
-    {
-        std::cout << "No division constraints used" << std::endl;
-        useDivisionConstraint = false;
-    }
-    else if(divisionIDs.count(-1))
+    if(withDivisionConstraints)
     {
         std::cout << "All division constraints used" << std::endl;
-        useDivisionConstraint = true;
     }
     else
     {
-        std::cout << divisionIDs.size() << " division constraints used" << std::endl;
-        useSomeDivision = true;
+        std::cout << "No division constraints used" << std::endl;
     }
 
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
-        // std::cout << "Adding Segmentation Hypotheses with ID " << iter->first << std::endl;
-
-        if(useSomeDivision)
-        {
-            useDivisionConstraint = false;
-            if(divisionIDs.count(iter->first))
-            {
-                // std::cout << "ADDING DIVISION CONSTRAINT FOR ID " << iter->first << std::endl;
-                useDivisionConstraint = true;
-            }
-        }
-
-		iter->second.addToOpenGMModel(model_, weights, settings_, detWeightIds, divWeightIds, appWeightIds, disWeightIds, useDivisionConstraint);
+		iter->second.addToOpenGMModel(model_, weights, settings_, detWeightIds, divWeightIds, appWeightIds, disWeightIds, withDivisionConstraints);
 	}
 
 	for(auto iter = exclusionConstraints_.begin(); iter != exclusionConstraints_.end() ; ++iter)
@@ -186,7 +165,7 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
     unsigned int divCountNew = 0;
 
     std::cout << "Iteration number 1: Solving without any division constraints..." << std::endl;
-    Solution solution = infer(weights, withIntegerConstraints, divisionIDs);
+    Solution solution = infer(weights, withIntegerConstraints, false);
     bool valid = verifySolution(solution, newDivisionIDs);
 
     divisionIDs = newDivisionIDs;
@@ -202,7 +181,7 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
     {
         ++iterCount;
         divCount = divisionIDs.size();
-        // solution = {};
+
         std::cout << "Iteration number " << iterCount << std::endl;
 
         solution = inferWithNewConstraints(weights, withIntegerConstraints, newDivisionIDs);
@@ -333,7 +312,7 @@ Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, b
 	}
 }
 
-Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::set<int>& divisionIDs)
+Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints)
 {
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
@@ -346,7 +325,7 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 	for(size_t i = 0; i < weights.size(); i++)
 		weightObject.setWeight(i, weights[i]);
 
-    initializeOpenGMModel(weightObject, divisionIDs);
+    initializeOpenGMModel(weightObject, withDivisionConstraints);
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
 
