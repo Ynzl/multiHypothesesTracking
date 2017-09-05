@@ -285,7 +285,7 @@ Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntege
 #endif
 		OptimizerType::Parameter optimizerParam;
 		optimizerParam.verbose_ = settings_->optimizerVerbose_;
-		optimizerParam.integerConstraint_ = true;
+		optimizerParam.integerConstraint_ = false;
 		optimizerParam.epGap_ = settings_->optimizerEpGap_;
 		optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
 
@@ -296,17 +296,17 @@ Solution Model::miniInfer(const std::vector<ValueType>& weights, bool withIntege
 		optimizer.infer(optimizerVisitor);
 		optimizer.arg(solution);
 
-		for(size_t i = 0; i < solution.size(); i++)
-        {
-            opengm::IndependentFactor<double, size_t, size_t> values;
-            optimizer.variable(i, values);
-            std::cout << "Variable " << i << ": ";
-            for(size_t state = 0; state < model_.numberOfLabels(i); state++)
-            {
-                std::cout << "(" << state << ")=" << values(state) << " ";
-            }
-            std::cout << std::endl;
-        }
+		// for(size_t i = 0; i < solution.size(); i++)
+  //       {
+  //           opengm::IndependentFactor<double, size_t, size_t> values;
+  //           optimizer.variable(i, values);
+  //           std::cout << "Variable " << i << ": ";
+  //           for(size_t state = 0; state < model_.numberOfLabels(i); state++)
+  //           {
+  //               std::cout << "(" << state << ")=" << values(state) << " ";
+  //           }
+  //           std::cout << std::endl;
+  //       }
 
 		std::cout << "solution has energy: " << optimizer.value() << std::endl;
 		foundSolutionValue_ = optimizer.value();
@@ -379,17 +379,17 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 		optimizer.infer(optimizerVisitor);
 		optimizer.arg(solution);
 
-		for(size_t i = 0; i < solution.size(); i++)
-        {
-            opengm::IndependentFactor<double, size_t, size_t> values;
-            optimizer.variable(i, values);
-            std::cout << "Variable " << i << ": ";
-            for(size_t state = 0; state < model_.numberOfLabels(i); state++)
-            {
-                std::cout << "(" << state << ")=" << values(state) << " ";
-            }
-            std::cout << std::endl;
-        }
+		// for(size_t i = 0; i < solution.size(); i++)
+  //       {
+  //           opengm::IndependentFactor<double, size_t, size_t> values;
+  //           optimizer.variable(i, values);
+  //           std::cout << "Variable " << i << ": ";
+  //           for(size_t state = 0; state < model_.numberOfLabels(i); state++)
+  //           {
+  //               std::cout << "(" << state << ")=" << values(state) << " ";
+  //           }
+  //           std::cout << std::endl;
+  //       }
 
 		std::cout << "solution has energy: " << optimizer.value() << std::endl;
 		foundSolutionValue_ = optimizer.value();
