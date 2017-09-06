@@ -83,7 +83,8 @@ public: // API
 		const std::vector<size_t>& appearanceWeightIds = {},
 		const std::vector<size_t>& disappearanceWeightIds = {},
         bool useDivisionConstraint = true,
-        bool useMergerConstraint = true);
+        bool useMergerConstraint = true
+        );
 
 	/**
 	 * @brief Add an incoming link to this node as hypothesis. Will be considered in conservation constraints
@@ -144,6 +145,8 @@ public: // API
     {
         return addDivisionConstraintToOpenGM(model, requireSeparateChildren);
     }
+
+	void addMergerConstraints(helpers::GraphicalModelType& model, std::shared_ptr<helpers::Settings> settings);
 
 private:
 	/**

@@ -90,7 +90,7 @@ size_t Model::computeNumWeights()
 	return numDetWeights_ + numDivWeights_ + numAppWeights_ + numDisWeights_ + numExternalDivWeights_ + numLinkWeights_;
 }
 
-void Model::initializeOpenGMModel(WeightsType& weights, bool withDivisionConstraints)
+void Model::initializeOpenGMModel(WeightsType& weights, bool withDivisionConstraints, bool withMergerConstrains)
 {
 	// make sure the numbers of features are initialized
 	computeNumWeights();
@@ -127,17 +127,18 @@ void Model::initializeOpenGMModel(WeightsType& weights, bool withDivisionConstra
 	}
 
     if(withDivisionConstraints)
-    {
         std::cout << "All division constraints used" << std::endl;
-    }
     else
-    {
         std::cout << "No division constraints used" << std::endl;
-    }
+
+    if(withMergerConstrains)
+        std::cout << "All merger constraints used" << std::endl;
+    else
+        std::cout << "No merger constraints used" << std::endl;
 
 	for(auto iter = segmentationHypotheses_.begin(); iter != segmentationHypotheses_.end() ; ++iter)
 	{
-		iter->second.addToOpenGMModel(model_, weights, settings_, detWeightIds, divWeightIds, appWeightIds, disWeightIds, withDivisionConstraints);
+		iter->second.addToOpenGMModel(model_, weights, settings_, detWeightIds, divWeightIds, appWeightIds, disWeightIds, withDivisionConstraints, withMergerConstrains);
 	}
 
 	for(auto iter = exclusionConstraints_.begin(); iter != exclusionConstraints_.end() ; ++iter)
@@ -165,7 +166,7 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
     unsigned int divCountNew = 0;
 
     std::cout << "Iteration number 1: Solving without any division constraints..." << std::endl;
-    Solution solution = infer(weights, withIntegerConstraints, false);
+    Solution solution = infer(weights, withIntegerConstraints, false, false);
     bool valid = verifySolution(solution, newDivisionIDs);
 
     divisionIDs = newDivisionIDs;
@@ -224,6 +225,7 @@ Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, b
     {
         std::cout << iter << ", ";
         segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
+        segmentationHypotheses_[iter].addMergerConstraints(model_, settings_);
     }
     std::cout << std::endl;
 
@@ -312,7 +314,7 @@ Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, b
 	}
 }
 
-Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints)
+Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints, bool withMergerConstrains)
 {
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
@@ -325,7 +327,7 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 	for(size_t i = 0; i < weights.size(); i++)
 		weightObject.setWeight(i, weights[i]);
 
-    initializeOpenGMModel(weightObject, withDivisionConstraints);
+    initializeOpenGMModel(weightObject, withDivisionConstraints, withMergerConstrains);
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
 

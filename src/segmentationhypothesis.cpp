@@ -291,7 +291,8 @@ void SegmentationHypothesis::addToOpenGMModel(
 	const std::vector<size_t>& appearanceWeightIds,
 	const std::vector<size_t>& disappearanceWeightIds,
     bool useDivisionConstraint,
-    bool useMergerConstraint)
+    bool useMergerConstraint
+    )
 {
 	if(!settings)
 		throw std::runtime_error("Settings object cannot be nullptr");
@@ -329,10 +330,13 @@ void SegmentationHypothesis::addToOpenGMModel(
 							  LinearConstraintFunctionType::LinearConstraintType::LinearConstraintOperatorType::GreaterEqual);
 	}
 
-	// add transition exclusion constraints in the multilabel case:
-	if(detection_.getNumStates() > 1)
+    // if(!useMergerConstraint)
+        // std::cout << "No Merger Constraints" << std::endl;
+
+    if(useMergerConstraint)
     {
-        if(useMergerConstraint)
+        // add transition exclusion constraints in the multilabel case:
+        if(detection_.getNumStates() > 1)
         {
             // std::cout << "Add Merger Constraints" << std::endl;
 
@@ -355,6 +359,34 @@ void SegmentationHypothesis::addToOpenGMModel(
             }
         }
 	}
+}
+
+void SegmentationHypothesis::addMergerConstraints(helpers::GraphicalModelType& model, std::shared_ptr<helpers::Settings> settings)
+{
+    std::cout << "Add Merger Constraints" << std::endl;
+    // add transition exclusion constraints in the multilabel case:
+    if(detection_.getNumStates() > 1)
+    {
+        // std::cout << "Add Merger Constraints" << std::endl;
+
+        if(appearance_.getOpenGMVariableId() >= 0 && settings->allowPartialMergerAppearance_ == false)
+        {
+            for(auto link : incomingLinks_)
+                addExclusionConstraintToOpenGM(model, appearance_.getOpenGMVariableId(), link->getVariable().getOpenGMVariableId());
+        }
+
+        if(disappearance_.getOpenGMVariableId() >= 0)
+        {
+            if(settings->allowPartialMergerAppearance_ == false)
+            {
+                for(auto link : outgoingLinks_)
+                    addExclusionConstraintToOpenGM(model, disappearance_.getOpenGMVariableId(), link->getVariable().getOpenGMVariableId());
+            }
+
+            if(division_.getOpenGMVariableId() >= 0)
+                addExclusionConstraintToOpenGM(model, disappearance_.getOpenGMVariableId(), division_.getOpenGMVariableId());
+        }
+    }
 }
 
 void SegmentationHypothesis::addIncomingLink(std::shared_ptr<LinkingHypothesis> link)

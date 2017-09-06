@@ -41,7 +41,7 @@ public:
 	 * @param withIntegerConstraints set to false if you just want the LP relaxation. Don't expect the solution to work in the rest of the code!
 	 * @return the vector of per-variable labels, can be used with the detection/linking hypotheses to query their state
 	 */
-	helpers::Solution infer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true, bool withDivisionConstraints = true);
+	helpers::Solution infer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true, bool withDivisionConstraints = true, bool withMergerConstrains = true);
 
 	/**
 	 * @brief Run learning using a given ground truth file and initial weights
@@ -103,7 +103,7 @@ public:
 	 *
 	 * @param weights a reference to the weights object that will be used in all
 	 */
-	void initializeOpenGMModel(helpers::WeightsType& weights, bool withDivisionConstraints = true);
+	void initializeOpenGMModel(helpers::WeightsType& weights, bool withDivisionConstraints = true, bool withMergerConstrains = true);
 
 	/**
 	 * @return a vector of strings describing each entry in the weight vector
