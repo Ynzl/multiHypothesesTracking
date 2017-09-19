@@ -209,6 +209,8 @@ Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, boo
 
 Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::set<int>& divisionIDs)
 {
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
 	assert(weights.size() == weightObject.numberOfWeights());
@@ -221,15 +223,18 @@ Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, b
 		weightObject.setWeight(i, weights[i]);
 
     std::cout << "Add " << divisionIDs.size() << " Division Constraints with IDs: " << std::endl;
+    start = std::chrono::system_clock::now();
     for(auto iter : divisionIDs)
     {
         std::cout << iter << ", ";
         segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
         segmentationHypotheses_[iter].addMergerConstraints(model_, settings_);
     }
+    end = std::chrono::system_clock::now();
     std::cout << std::endl;
 
-    std::chrono::time_point<std::chrono::system_clock> start, end;
+    std::chrono::duration<double> model_time = end - start;
+    std::cout << "Adding to model time: " << model_time.count() << std::endl;
 
 	if(withIntegerConstraints)
 	{
@@ -293,16 +298,16 @@ Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, b
 		optimizer.arg(solution);
 
 		// for(size_t i = 0; i < solution.size(); i++)
-  //       {
-  //           opengm::IndependentFactor<double, size_t, size_t> values;
-  //           optimizer.variable(i, values);
-  //           std::cout << "Variable " << i << ": ";
-  //           for(size_t state = 0; state < model_.numberOfLabels(i); state++)
-  //           {
-  //               std::cout << "(" << state << ")=" << values(state) << " ";
-  //           }
-  //           std::cout << std::endl;
-  //       }
+        // {
+            // opengm::IndependentFactor<double, size_t, size_t> values;
+            // optimizer.variable(i, values);
+            // std::cout << "Variable " << i << ": ";
+            // for(size_t state = 0; state < model_.numberOfLabels(i); state++)
+            // {
+                // std::cout << "(" << state << ")=" << values(state) << " ";
+            // }
+            // std::cout << std::endl;
+        // }
 
 		std::cout << "solution has energy: " << optimizer.value() << std::endl;
 		foundSolutionValue_ = optimizer.value();
@@ -314,8 +319,10 @@ Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, b
 	}
 }
 
-Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints, bool withMergerConstrains)
+Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints, bool withMergerConstrains)
 {
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
 	assert(weights.size() == weightObject.numberOfWeights());
@@ -327,9 +334,72 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 	for(size_t i = 0; i < weights.size(); i++)
 		weightObject.setWeight(i, weights[i]);
 
+    start = std::chrono::system_clock::now();
     initializeOpenGMModel(weightObject, withDivisionConstraints, withMergerConstrains);
+    end = std::chrono::system_clock::now();
 
+    std::chrono::duration<double> model_time = end - start;
+    std::cout << "Model initialization time: " << model_time.count() << std::endl;
+
+
+#ifdef WITH_CPLEX
+    std::cout << "Using cplex optimizer" << std::endl;
+    typedef opengm::LPCplex2<GraphicalModelType, opengm::Minimizer> OptimizerType;
+#else
+    std::cout << "Using gurobi optimizer" << std::endl;
+    typedef opengm::LPGurobi2<GraphicalModelType, opengm::Minimizer> OptimizerType;
+#endif
+
+    OptimizerType::Parameter optimizerParam;
+    optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
+    optimizerParam.verbose_ = settings_->optimizerVerbose_;
+    optimizerParam.useSoftConstraints_ = false;
+    optimizerParam.integerConstraintNodeVar_ = true;
+    optimizerParam.epGap_ = settings_->optimizerEpGap_;
+    optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
+
+    OptimizerType optimizer(model_, optimizerParam);
+
+    Solution solution(model_.numberOfVariables());
+    OptimizerType::VerboseVisitorType optimizerVisitor;
+
+    start = std::chrono::system_clock::now();
+    optimizer.infer(optimizerVisitor);
+    end = std::chrono::system_clock::now();
+
+    optimizer.arg(solution);
+    std::cout << "solution has energy: " << optimizer.value() << std::endl;
+    foundSolutionValue_ = optimizer.value();
+
+    std::chrono::duration<double> solve_time = end - start;
+    std::cout << "Solving time: " << solve_time.count() << std::endl;
+
+    return solution;
+}
+
+
+Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints, bool withMergerConstrains)
+{
     std::chrono::time_point<std::chrono::system_clock> start, end;
+
+	// use weights that were given
+	WeightsType weightObject(computeNumWeights());
+	assert(weights.size() == weightObject.numberOfWeights());
+	if(weights.size() != weightObject.numberOfWeights())
+	{
+		std::cout << "Provided length of vector with initial weights has wrong length!" << std::endl;
+		throw std::runtime_error("Provided length of vector with initial weights has wrong length!");
+	}
+	for(size_t i = 0; i < weights.size(); i++)
+		weightObject.setWeight(i, weights[i]);
+
+    start = std::chrono::system_clock::now();
+    initializeOpenGMModel(weightObject, withDivisionConstraints, withMergerConstrains);
+    end = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> model_time = end - start;
+    std::cout << "Modeling time: " << model_time.count() << std::endl;
+
 
 	if(withIntegerConstraints)
 	{

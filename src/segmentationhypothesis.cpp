@@ -141,7 +141,10 @@ void SegmentationHypothesis::addOutgoingConstraintToOpenGM(GraphicalModelType& m
 void SegmentationHypothesis::addDivisionConstraintToOpenGM(GraphicalModelType& model, bool requireSeparateChildren)
 {
 	if(division_.getOpenGMVariableId() < 0)
+    {
+        // std::cout << "NO DIVISION VARIABLE FOR CONSTRAINT" << std::endl;
 		return;
+    }
 
     // std::cout << "ADDING DIVISION CONSTRAINT!" << std::endl;
 
@@ -330,8 +333,6 @@ void SegmentationHypothesis::addToOpenGMModel(
 							  LinearConstraintFunctionType::LinearConstraintType::LinearConstraintOperatorType::GreaterEqual);
 	}
 
-    // if(!useMergerConstraint)
-        // std::cout << "No Merger Constraints" << std::endl;
 
     if(useMergerConstraint)
     {
@@ -363,7 +364,7 @@ void SegmentationHypothesis::addToOpenGMModel(
 
 void SegmentationHypothesis::addMergerConstraints(helpers::GraphicalModelType& model, std::shared_ptr<helpers::Settings> settings)
 {
-    std::cout << "Add Merger Constraints" << std::endl;
+    // std::cout << "Add Merger Constraints" << std::endl;
     // add transition exclusion constraints in the multilabel case:
     if(detection_.getNumStates() > 1)
     {

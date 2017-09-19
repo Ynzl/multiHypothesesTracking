@@ -143,7 +143,7 @@ public: // API
 
 	void addDivisionConstraint(helpers::GraphicalModelType& model, bool requireSeparateChildren)
     {
-        return addDivisionConstraintToOpenGM(model, requireSeparateChildren);
+        addDivisionConstraintToOpenGM(model, requireSeparateChildren);
     }
 
 	void addMergerConstraints(helpers::GraphicalModelType& model, std::shared_ptr<helpers::Settings> settings);
