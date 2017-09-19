@@ -1,0 +1,578 @@
+Relax on division constraints...
+************************
+Settings are:
+	StatesShareWeights: true
+	AllowPartialMergerAppearance: false
+	AllowLengthOneTracks: false
+	RequireSeparateChildrenOfDivision: true
+	NonNegativeWeightsOnly: false
+	OptimizerEpGap: 0
+	OptimizerVerbose: true
+	OptimizerNumThreads: 1
+************************
+	contains 22198 segmentation hypotheses
+	contains 34344 linking hypotheses
+	contains 0 division hypotheses
+	contains 0 exclusions
+Iteration number 1: Solving without any division constraints...
+Initializing opengm model...
+No division constraints used
+No merger constraints used
+Model has 525402 indicator variables
+Using gurobi optimizer
+Academic license - for non-commercial use only
+begin: value 1.16905e+07 bound -inf
+Optimize a model with 177888 rows, 525402 columns and 1210074 nonzeros
+Variable types: 0 continuous, 525402 integer (525402 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [3e-05, 3e+04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.16905e+07
+Presolve removed 54752 rows and 115879 columns (presolve time = 5s) ...
+Presolve removed 54752 rows and 115879 columns
+Presolve time: 5.56s
+Presolved: 123136 rows, 409523 columns, 1034858 nonzeros
+Variable types: 0 continuous, 409523 integer (409523 binary)
+Presolved: 123136 rows, 409523 columns, 1034858 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    5.7412955e+05   3.318500e+03   0.000000e+00      6s
+   16243    7.5328400e+05   0.000000e+00   0.000000e+00      7s
+
+Root relaxation: objective 7.532840e+05, 16243 iterations, 0.76 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 753283.996    0  902 1.1691e+07 753283.996  93.6%     -    7s
+H    0     0                    2593715.4802 753283.996  71.0%     -    8s
+     0     0 761969.162    0  773 2593715.48 761969.162  70.6%     -    9s
+H    0     0                    828247.69800 761969.162  8.00%     -   10s
+H    0     0                    765577.59687 761969.162  0.47%     -   11s
+     0     0 764873.603    0   45 765577.597 764873.603  0.09%     -   12s
+H    0     0                    765128.47769 764873.603  0.03%     -   13s
+     0     0 764949.458    0   43 765128.478 764949.458  0.02%     -   14s
+     0     0 764949.458    0  975 765128.478 764949.458  0.02%     -   20s
+     0     0 764949.458    0  222 765128.478 764949.458  0.02%     -   22s
+H    0     0                    765084.52964 764949.458  0.02%     -   23s
+     0     0 764984.073    0   15 765084.530 764984.073  0.01%     -   23s
+     0     0 764986.490    0   19 765084.530 764986.490  0.01%     -   23s
+*    0     0               0    764994.00817 764994.008  0.00%     -   24s
+
+Cutting planes:
+  Gomory: 254
+  Cover: 527
+  Clique: 525
+  GUB cover: 293
+  Zero half: 131
+
+Explored 1 nodes (45734 simplex iterations) in 24.27 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 7: 764994 765085 765128 ... 1.16905e+07
+No other solutions better than 764994
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 7.649940081651e+05, best bound 7.649940081651e+05, gap 0.0000%
+step: 1 value 764994 bound 764994
+value 764994 bound 764994
+solution has energy: 764994
+Solving time: 24.9206
+Checking solution...
+At node 610: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 1236: division > value: 1 > 0 -> INVALID!
+	Found violated flow conservation constraint 
+At node 1518: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 1843: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 2134: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 2582: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 2807: division > value: 1 > 0 -> INVALID!
+	Found violated flow conservation constraint 
+At node 3504: division > value: 1 > 0 -> INVALID!
+	Found violated flow conservation constraint 
+At node 4685: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 5174: division > value: 1 > 0 -> INVALID!
+	Found violated flow conservation constraint 
+At node 5834: division > value: 1 > 0 -> INVALID!
+	Found violated flow conservation constraint 
+At node 10450: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 11967: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 12272: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 14646: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 14885: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 15394: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 17284: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 17383: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 18686: division > value: 1 > 0 -> INVALID!
+	Found violated flow conservation constraint 
+At node 20248: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 20685: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 20997: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 21338: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 21412: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+Divisions: 183
+divCount: 0
+divCountNew: 25
+Is solution valid? no
+Iteration number 2
+Add 25 Division Constraints with IDs: 
+610, Add Merger Constraints
+1236, Add Merger Constraints
+1518, Add Merger Constraints
+1843, Add Merger Constraints
+2134, Add Merger Constraints
+2582, Add Merger Constraints
+2807, Add Merger Constraints
+3504, Add Merger Constraints
+4685, Add Merger Constraints
+5174, Add Merger Constraints
+5834, Add Merger Constraints
+10450, Add Merger Constraints
+11967, Add Merger Constraints
+12272, Add Merger Constraints
+14646, Add Merger Constraints
+14885, Add Merger Constraints
+15394, Add Merger Constraints
+17284, Add Merger Constraints
+17383, Add Merger Constraints
+18686, Add Merger Constraints
+20248, Add Merger Constraints
+20685, Add Merger Constraints
+20997, Add Merger Constraints
+21338, Add Merger Constraints
+21412, Add Merger Constraints
+
+Using gurobi optimizer
+Academic license - for non-commercial use only
+begin: value 1.16905e+07 bound -inf
+Optimize a model with 178021 rows, 525402 columns and 1210356 nonzeros
+Variable types: 0 continuous, 525402 integer (525402 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [3e-05, 3e+04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.16905e+07
+Presolve removed 54793 rows and 115829 columns (presolve time = 5s) ...
+Presolve removed 54793 rows and 115829 columns
+Presolve time: 5.62s
+Presolved: 123228 rows, 409573 columns, 1035149 nonzeros
+Variable types: 0 continuous, 409573 integer (409573 binary)
+Presolved: 123228 rows, 409573 columns, 1035149 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    5.6969212e+05   3.694125e+03   0.000000e+00      6s
+   16330    7.5336838e+05   0.000000e+00   0.000000e+00      7s
+
+Root relaxation: objective 7.533684e+05, 16330 iterations, 0.77 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 753368.383    0  956 1.1691e+07 753368.383  93.6%     -    7s
+H    0     0                    1889614.3736 753368.383  60.1%     -    8s
+     0     0 762389.061    0  798 1889614.37 762389.061  59.7%     -    9s
+H    0     0                    831915.42952 762389.061  8.36%     -   11s
+H    0     0                    766656.47352 762389.061  0.56%     -   11s
+     0     0 762452.886    0  787 766656.474 762452.886  0.55%     -   11s
+     0     0 765351.886    0   48 766656.474 765351.886  0.17%     -   12s
+H    0     0                    765624.24433 765351.886  0.04%     -   14s
+     0     0 765483.954    0   32 765624.244 765483.954  0.02%     -   15s
+     0     0 765483.954    0  982 765624.244 765483.954  0.02%     -   20s
+     0     0 765483.954    0  213 765624.244 765483.954  0.02%     -   22s
+H    0     0                    765580.29628 765483.954  0.01%     -   23s
+     0     0 765504.768    0   23 765580.296 765504.768  0.01%     -   24s
+     0     0 765530.000    0   17 765580.296 765530.000  0.01%     -   24s
+*    0     0               0    765534.70549 765534.705  0.00%     -   24s
+
+Cutting planes:
+  Gomory: 256
+  Cover: 537
+  Clique: 550
+  MIR: 2
+  GUB cover: 296
+  Zero half: 118
+
+Explored 1 nodes (46787 simplex iterations) in 25.00 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 7: 765535 765580 765624 ... 1.16905e+07
+No other solutions better than 765535
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 7.655347054852e+05, best bound 7.655347054852e+05, gap 0.0000%
+step: 1 value 765535 bound 765535
+value 765535 bound 765535
+solution has energy: 765535
+Solving time: 25.6495
+Checking solution...
+At node 1939: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 20447: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+At node 21411: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+Divisions: 175
+divCount: 25
+divCountNew: 28
+Is solution valid? no
+Iteration number 3
+Add 3 Division Constraints with IDs: 
+1939, Add Merger Constraints
+20447, Add Merger Constraints
+21411, Add Merger Constraints
+
+Using gurobi optimizer
+Academic license - for non-commercial use only
+begin: value 1.16905e+07 bound -inf
+Optimize a model with 178033 rows, 525402 columns and 1210381 nonzeros
+Variable types: 0 continuous, 525402 integer (525402 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [3e-05, 3e+04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.16905e+07
+Presolve removed 54792 rows and 115821 columns (presolve time = 5s) ...
+Presolve removed 54792 rows and 115821 columns
+Presolve time: 5.36s
+Presolved: 123241 rows, 409581 columns, 1035183 nonzeros
+Variable types: 0 continuous, 409581 integer (409581 binary)
+Presolved: 123241 rows, 409581 columns, 1035183 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    5.6919000e+05   3.728625e+03   0.000000e+00      6s
+   16411    7.5336838e+05   0.000000e+00   0.000000e+00      6s
+
+Root relaxation: objective 7.533684e+05, 16411 iterations, 0.78 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 753368.383    0  957 1.1691e+07 753368.383  93.6%     -    7s
+H    0     0                    2058551.9337 753368.383  63.4%     -    8s
+     0     0 762432.796    0  803 2058551.93 762432.796  63.0%     -    9s
+H    0     0                    771682.20894 762432.796  1.20%     -   11s
+     0     0 762496.621    0  791 771682.209 762496.621  1.19%     -   11s
+     0     0 765460.184    0   44 771682.209 765460.184  0.81%     -   12s
+H    0     0                    766326.67113 765460.184  0.11%     -   13s
+H    0     0                    765659.43418 765460.184  0.03%     -   13s
+     0     0 765547.719    0   37 765659.434 765547.719  0.01%     -   15s
+H    0     0                    765645.29650 765547.719  0.01%     -   19s
+     0     0 765547.719    0  956 765645.297 765547.719  0.01%     -   19s
+     0     0 765547.719    0   87 765645.297 765547.719  0.01%     -   20s
+H    0     0                    765615.48613 765547.719  0.01%     -   21s
+     0     0 765570.653    0   13 765615.486 765570.653  0.01%     -   21s
+     0     0 765574.150    0   14 765615.486 765574.150  0.01%     -   22s
+*    0     0               0    765580.02150 765580.022  0.00%     -   22s
+
+Cutting planes:
+  Gomory: 246
+  Cover: 341
+  Clique: 501
+  MIR: 3
+  GUB cover: 216
+  Zero half: 141
+
+Explored 1 nodes (37821 simplex iterations) in 22.40 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 8: 765580 765615 765645 ... 1.16905e+07
+No other solutions better than 765580
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 7.655800215002e+05, best bound 7.655800215002e+05, gap 0.0000%
+step: 1 value 765580 bound 765580
+value 765580 bound 765580
+solution has energy: 765580
+Solving time: 23.0513
+Checking solution...
+At node 2368: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 20636: there are active incoming transitions and active appearances!
+	Found violated flow conservation constraint 
+Divisions: 175
+divCount: 28
+divCountNew: 30
+Is solution valid? no
+Iteration number 4
+Add 2 Division Constraints with IDs: 
+2368, Add Merger Constraints
+20636, Add Merger Constraints
+
+Using gurobi optimizer
+Academic license - for non-commercial use only
+begin: value 1.16905e+07 bound -inf
+Optimize a model with 178045 rows, 525402 columns and 1210407 nonzeros
+Variable types: 0 continuous, 525402 integer (525402 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [3e-05, 3e+04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.16905e+07
+Presolve removed 54790 rows and 115815 columns (presolve time = 5s) ...
+Presolve removed 54790 rows and 115815 columns
+Presolve time: 5.44s
+Presolved: 123255 rows, 409587 columns, 1035217 nonzeros
+Variable types: 0 continuous, 409587 integer (409587 binary)
+Presolved: 123255 rows, 409587 columns, 1035217 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    5.6918337e+05   3.741625e+03   0.000000e+00      6s
+   16390    7.5336838e+05   0.000000e+00   0.000000e+00      7s
+
+Root relaxation: objective 7.533684e+05, 16390 iterations, 0.83 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 753368.383    0  957 1.1691e+07 753368.383  93.6%     -    7s
+H    0     0                    2519099.3568 753368.383  70.1%     -    8s
+     0     0 762448.085    0  827 2519099.36 762448.085  69.7%     -    9s
+H    0     0                    777977.56877 762448.085  2.00%     -   11s
+     0     0 762519.671    0  803 777977.569 762519.671  1.99%     -   11s
+     0     0 765420.683    0   53 777977.569 765420.683  1.61%     -   12s
+H    0     0                    766740.29222 765420.683  0.17%     -   13s
+H    0     0                    766144.87271 765420.683  0.09%     -   13s
+     0     0 765519.446    0   61 766144.873 765519.446  0.08%     -   14s
+H    0     0                    765951.55346 765519.446  0.06%     -   14s
+H    0     0                    765728.81783 765519.446  0.03%     -   15s
+     0     0 765520.717    0   47 765728.818 765520.717  0.03%     -   15s
+     0     0 765614.063    0   22 765728.818 765614.063  0.01%     -   16s
+     0     0 765614.063    0  953 765728.818 765614.063  0.01%     -   20s
+     0     0 765614.063    0   83 765728.818 765614.063  0.01%     -   21s
+H    0     0                    765722.39413 765614.063  0.01%     -   22s
+     0     0 765614.063    0   17 765722.394 765614.063  0.01%     -   22s
+     0     0 765617.566    0    9 765722.394 765617.566  0.01%     -   23s
+     0     0 765617.566    0   12 765722.394 765617.566  0.01%     -   23s
+*    0     0               0    765620.24851 765620.249  0.00%     -   23s
+
+Cutting planes:
+  Gomory: 240
+  Cover: 340
+  Clique: 504
+  MIR: 5
+  GUB cover: 229
+  Zero half: 128
+
+Explored 1 nodes (37626 simplex iterations) in 23.61 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 9: 765620 765722 765729 ... 1.16905e+07
+No other solutions better than 765620
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 7.656202485111e+05, best bound 7.656202485111e+05, gap 0.0000%
+step: 1 value 765620 bound 765620
+value 765620 bound 765620
+solution has energy: 765620
+Solving time: 24.3311
+Checking solution...
+At node 1776: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+At node 17187: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+Divisions: 175
+divCount: 30
+divCountNew: 32
+Is solution valid? no
+Iteration number 5
+Add 2 Division Constraints with IDs: 
+1776, Add Merger Constraints
+17187, Add Merger Constraints
+
+Using gurobi optimizer
+Academic license - for non-commercial use only
+begin: value 1.16905e+07 bound -inf
+Optimize a model with 178055 rows, 525402 columns and 1210428 nonzeros
+Variable types: 0 continuous, 525402 integer (525402 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [3e-05, 3e+04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.16905e+07
+Presolve removed 54791 rows and 115810 columns (presolve time = 5s) ...
+Presolve removed 54791 rows and 115810 columns
+Presolve time: 6.09s
+Presolved: 123264 rows, 409592 columns, 1035242 nonzeros
+Variable types: 0 continuous, 409592 integer (409592 binary)
+Presolved: 123264 rows, 409592 columns, 1035242 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    5.6865687e+05   3.776125e+03   0.000000e+00      7s
+   16351    7.5336838e+05   0.000000e+00   0.000000e+00      7s
+
+Root relaxation: objective 7.533684e+05, 16351 iterations, 0.78 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 753368.383    0  957 1.1691e+07 753368.383  93.6%     -    7s
+H    0     0                    2036556.6727 753368.383  63.0%     -    9s
+     0     0 762448.085    0  827 2036556.67 762448.085  62.6%     -   10s
+H    0     0                    777977.56877 762448.085  2.00%     -   12s
+     0     0 762524.537    0  811 777977.569 762524.537  1.99%     -   12s
+     0     0 762524.537    0  811 777977.569 762524.537  1.99%     -   12s
+     0     0 765430.415    0   53 777977.569 765430.415  1.61%     -   13s
+H    0     0                    766685.15517 765430.415  0.16%     -   15s
+H    0     0                    766154.60499 765430.415  0.09%     -   15s
+     0     0 765580.843    0   41 766154.605 765580.843  0.07%     -   16s
+     0     0 765586.518    0   37 766154.605 765586.518  0.07%     -   17s
+     0     0 765608.887    0   25 766154.605 765608.887  0.07%     -   19s
+     0     0 765608.887    0  968 766154.605 765608.887  0.07%     -   25s
+H    0     0                    765808.08822 765608.887  0.03%     -   26s
+     0     0 765608.887    0  285 765808.088 765608.887  0.03%     -   27s
+H    0     0                    765764.14018 765608.887  0.02%     -   28s
+     0     0 765608.887    0   40 765764.140 765608.887  0.02%     -   29s
+     0     0 765631.037    0   32 765764.140 765631.037  0.02%     -   30s
+     0     0 765644.683    0   22 765764.140 765644.683  0.02%     -   30s
+*    0     0               0    765650.86787 765650.868  0.00%     -   31s
+
+Cutting planes:
+  Gomory: 242
+  Cover: 734
+  Clique: 471
+  MIR: 5
+  GUB cover: 421
+  Zero half: 115
+
+Explored 1 nodes (48915 simplex iterations) in 31.54 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 8: 765651 765764 765808 ... 1.16905e+07
+No other solutions better than 765651
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 7.656508678725e+05, best bound 7.656508678725e+05, gap 0.0000%
+step: 1 value 765651 bound 765651
+value 765651 bound 765651
+solution has energy: 765651
+Solving time: 32.2333
+Checking solution...
+At node 2213: there are active outgoing transitions and active disappearances!
+	Found violated flow conservation constraint 
+Divisions: 176
+divCount: 32
+divCountNew: 33
+Is solution valid? no
+Iteration number 6
+Add 1 Division Constraints with IDs: 
+2213, Add Merger Constraints
+
+Using gurobi optimizer
+Academic license - for non-commercial use only
+begin: value 1.16905e+07 bound -inf
+Optimize a model with 178062 rows, 525402 columns and 1210443 nonzeros
+Variable types: 0 continuous, 525402 integer (525402 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [3e-05, 3e+04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.16905e+07
+Presolve removed 54791 rows and 115807 columns (presolve time = 6s) ...
+Presolve removed 54791 rows and 115807 columns
+Presolve time: 5.79s
+Presolved: 123271 rows, 409595 columns, 1035260 nonzeros
+Variable types: 0 continuous, 409595 integer (409595 binary)
+Presolved: 123271 rows, 409595 columns, 1035260 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    5.6831237e+05   3.799125e+03   0.000000e+00      7s
+   16412    7.5336838e+05   0.000000e+00   0.000000e+00      7s
+
+Root relaxation: objective 7.533684e+05, 16412 iterations, 0.88 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 753368.383    0  957 1.1691e+07 753368.383  93.6%     -    7s
+H    0     0                    2072272.4804 753368.383  63.6%     -    8s
+     0     0 762448.085    0  827 2072272.48 762448.085  63.2%     -    9s
+H    0     0                    777977.56877 762448.085  2.00%     -   11s
+     0     0 762524.783    0  807 777977.569 762524.783  1.99%     -   11s
+     0     0 765432.796    0   68 777977.569 765432.796  1.61%     -   12s
+H    0     0                    766865.51626 765432.796  0.19%     -   14s
+H    0     0                    766178.15448 765432.796  0.10%     -   14s
+     0     0 765439.222    0   55 766178.154 765439.222  0.10%     -   14s
+     0     0 765439.222    0   53 766178.154 765439.222  0.10%     -   15s
+     0     0 765550.745    0   53 766178.154 765550.745  0.08%     -   16s
+H    0     0                    765970.84087 765550.745  0.05%     -   17s
+H    0     0                    765699.32269 765550.745  0.02%     -   17s
+     0     0 765553.181    0   39 765699.323 765553.181  0.02%     -   17s
+     0     0 765612.111    0   29 765699.323 765612.111  0.01%     -   18s
+H    0     0                    765697.12722 765612.111  0.01%     -   22s
+     0     0 765612.111    0  829 765697.127 765612.111  0.01%     -   23s
+     0     0 765612.111    0   70 765697.127 765612.111  0.01%     -   24s
+     0     0 765646.234    0   23 765697.127 765646.234  0.01%     -   24s
+     0     0 765656.991    0    9 765697.127 765656.991  0.01%     -   25s
+*    0     0               0    765659.67406 765659.674  0.00%     -   25s
+
+Cutting planes:
+  Gomory: 233
+  Cover: 312
+  Clique: 438
+  MIR: 6
+  GUB cover: 184
+  Zero half: 119
+
+Explored 1 nodes (36457 simplex iterations) in 25.25 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 9: 765660 765697 765699 ... 1.16905e+07
+No other solutions better than 765660
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 7.656596740574e+05, best bound 7.656596740574e+05, gap 0.0000%
+step: 1 value 765660 bound 765660
+value 765660 bound 765660
+solution has energy: 765660
+Solving time: 25.9326
+Checking solution...
+Divisions: 176
+divCount: 33
+divCountNew: 33
+Is solution valid? yes
+Number of iterations: 6
+Found valid solution? yes

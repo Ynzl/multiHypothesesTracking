@@ -1,0 +1,88 @@
+************************
+Settings are:
+	StatesShareWeights: true
+	AllowPartialMergerAppearance: false
+	AllowLengthOneTracks: false
+	RequireSeparateChildrenOfDivision: true
+	NonNegativeWeightsOnly: false
+	OptimizerEpGap: 0
+	OptimizerVerbose: true
+	OptimizerNumThreads: 1
+************************
+	contains 22198 segmentation hypotheses
+	contains 34344 linking hypotheses
+	contains 0 division hypotheses
+	contains 0 exclusions
+Initializing opengm model...
+All division constraints used
+Model has 525402 indicator variables
+Using gurobi optimizer
+Academic license - for non-commercial use only
+begin: value 1.16905e+07 bound -inf
+Optimize a model with 277644 rows, 525402 columns and 1420182 nonzeros
+Variable types: 0 continuous, 525402 integer (525402 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [3e-05, 3e+04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.16905e+07
+Presolve removed 16901 rows and 41773 columns (presolve time = 6s) ...
+Presolve removed 16901 rows and 41773 columns
+Presolve time: 6.24s
+Presolved: 260743 rows, 483629 columns, 1354438 nonzeros
+Variable types: 0 continuous, 483629 integer (483629 binary)
+Presolved: 260743 rows, 483629 columns, 1354438 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    1.7223244e+05   1.784910e+05   0.000000e+00      7s
+   90661    7.5500138e+05   0.000000e+00   0.000000e+00      8s
+
+Root relaxation: objective 7.550014e+05, 90661 iterations, 1.69 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 755001.380    0 1504 1.1691e+07 755001.380  93.5%     -    9s
+H    0     0                    856225.03709 755001.380  11.8%     -   15s
+H    0     0                    790624.45063 755001.380  4.51%     -   16s
+H    0     0                    790493.42619 755001.380  4.49%     -   16s
+     0     0 762488.316    0 1357 790493.426 762488.316  3.54%     -   18s
+H    0     0                    769259.58075 762488.316  0.88%     -   21s
+     0     0 762578.443    0 1317 769259.581 762578.443  0.87%     -   21s
+     0     0 765592.086    0   88 769259.581 765592.086  0.48%     -   23s
+H    0     0                    766012.16123 765592.086  0.05%     -   24s
+H    0     0                    765845.72843 765592.086  0.03%     -   25s
+     0     0 765610.955    0   30 765845.728 765610.955  0.03%     -   25s
+     0     0 765625.261    0   35 765845.728 765625.261  0.03%     -   27s
+     0     0 765625.261    0  522 765845.728 765625.261  0.03%     -   38s
+     0     0 765625.261    0   45 765845.728 765625.261  0.03%     -   40s
+H    0     0                    765807.76184 765625.261  0.02%     -   40s
+     0     0 765656.988    0   27 765807.762 765656.988  0.02%     -   41s
+     0     0 765662.598    0   16 765807.762 765662.598  0.02%     -   41s
+*    0     0               0    765668.46911 765668.469  0.00%     -   41s
+
+Cutting planes:
+  Gomory: 125
+  Cover: 131
+  Implied bound: 1
+  Clique: 329
+  MIR: 1
+  GUB cover: 52
+  Zero half: 160
+
+Explored 1 nodes (111666 simplex iterations) in 41.99 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 9: 765668 765808 765846 ... 1.16905e+07
+No other solutions better than 765668
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 7.656684691039e+05, best bound 7.656684691039e+05, gap 0.0000%
+step: 1 value 765668 bound 765668
+value 765668 bound 765668
+solution has energy: 765668
+Solving time: 42.7888
