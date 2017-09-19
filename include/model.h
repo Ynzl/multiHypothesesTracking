@@ -35,7 +35,7 @@ public:
 
 	helpers::Solution inferWithNewConstraints(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true, const std::set<int>& divisionIDs = {});
 
-	helpers::Solution integerRelaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true, bool withDivisionConstraints = true, bool withMergerConstrains = true);
+	helpers::Solution integerRelaxedInfer(const std::vector<helpers::ValueType>& weights);
 
 	/**
 	 * @brief Find the minimal-energy configuration using an ILP

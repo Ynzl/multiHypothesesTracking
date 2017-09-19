@@ -62,7 +62,11 @@ int main(int argc, char** argv) {
             JsonModel model;
             model.readFromJson(modelFilename);
             std::vector<double> weights = readWeightsFromJson(weightsFilename);
-            Solution solution = model.relaxedInfer(weights, withIntegerConstraints);
+            Solution solution = {};
+            // if(withIntegerConstraints)
+            //     solution = model.integerRelaxedInfer(weights);
+            // else
+                solution = model.relaxedInfer(weights, withIntegerConstraints);
             model.saveResultToJson(outputFilename, solution);
         }
 	}

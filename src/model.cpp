@@ -319,8 +319,10 @@ Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, b
 	}
 }
 
-Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints, bool withMergerConstrains)
+Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights)
 {
+    std::cout << "FANCY" << std::endl;
+
     std::chrono::time_point<std::chrono::system_clock> start, end;
 
 	// use weights that were given
@@ -335,7 +337,7 @@ Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights, bool 
 		weightObject.setWeight(i, weights[i]);
 
     start = std::chrono::system_clock::now();
-    initializeOpenGMModel(weightObject, withDivisionConstraints, withMergerConstrains);
+    initializeOpenGMModel(weightObject, false, false);
     end = std::chrono::system_clock::now();
 
     std::chrono::duration<double> model_time = end - start;
@@ -358,23 +360,70 @@ Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights, bool 
     optimizerParam.epGap_ = settings_->optimizerEpGap_;
     optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
 
-    OptimizerType optimizer(model_, optimizerParam);
 
-    Solution solution(model_.numberOfVariables());
-    OptimizerType::VerboseVisitorType optimizerVisitor;
+    std::set<int> divisionIDs = {};
+    std::set<int> newDivisionIDs = {};
+    unsigned int iterCount = 0;
+    unsigned int divCount = 0;
+    unsigned int divCountNew = 0;
+    bool valid = false;
+    Solution sol = {};
 
-    start = std::chrono::system_clock::now();
-    optimizer.infer(optimizerVisitor);
-    end = std::chrono::system_clock::now();
+    do
+    {
+        ++iterCount;
+        divCount = divisionIDs.size();
 
-    optimizer.arg(solution);
-    std::cout << "solution has energy: " << optimizer.value() << std::endl;
-    foundSolutionValue_ = optimizer.value();
+        std::cout << "Iteration number " << iterCount << std::endl;
 
-    std::chrono::duration<double> solve_time = end - start;
-    std::cout << "Solving time: " << solve_time.count() << std::endl;
 
-    return solution;
+        std::cout << "Add " << newDivisionIDs.size() << " Division Constraints with IDs: " << std::endl;
+        start = std::chrono::system_clock::now();
+        for(auto iter : newDivisionIDs)
+        {
+            std::cout << iter << ", ";
+            segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
+            segmentationHypotheses_[iter].addMergerConstraints(model_, settings_);
+        }
+        end = std::chrono::system_clock::now();
+        std::cout << std::endl;
+
+
+        OptimizerType optimizer(model_, optimizerParam);
+
+        Solution solution(model_.numberOfVariables());
+        OptimizerType::VerboseVisitorType optimizerVisitor;
+
+        start = std::chrono::system_clock::now();
+        optimizer.infer(optimizerVisitor);
+        end = std::chrono::system_clock::now();
+
+        optimizer.arg(solution);
+        std::cout << "solution has energy: " << optimizer.value() << std::endl;
+        foundSolutionValue_ = optimizer.value();
+
+        std::chrono::duration<double> solve_time = end - start;
+        std::cout << "Solving time: " << solve_time.count() << std::endl;
+
+
+        newDivisionIDs = {};
+        valid = verifySolution(solution, newDivisionIDs);
+
+        divisionIDs.insert(newDivisionIDs.begin(), newDivisionIDs.end());
+        divCountNew = divisionIDs.size();
+
+        std::cout << "divCount: " << divCount << std::endl;
+        std::cout << "divCountNew: " << divCountNew << std::endl;
+
+        std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
+
+        sol = solution;
+    }
+    while(!valid && divCountNew > divCount);
+
+    std::cout << "Number of iterations: " << iterCount << std::endl;
+
+    return sol;
 }
 
 
