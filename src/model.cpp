@@ -4,7 +4,6 @@
 #include <numeric>
 #include <sstream>
 #include <chrono>
-#include <ctime>
 
 // include the LPDef symbols only once!
 #undef OPENGM_LPDEF_NO_SYMBOLS
@@ -157,6 +156,7 @@ void Model::initializeOpenGMModel(WeightsType& weights, bool withDivisionConstra
 Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weights, bool withIntegerConstraints)
 {
     std::cout << "Infer with Cutting Constraints..." << std::endl;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
@@ -170,10 +170,9 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
 		weightObject.setWeight(i, weights[i]);
 
 
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
+    start = std::chrono::high_resolution_clock::now();
     initializeOpenGMModel(weightObject, false, false);
-    end = std::chrono::system_clock::now();
+    end = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> model_time = end - start;
     std::cout << "Model initialization time: " << model_time.count() << std::endl;
@@ -203,6 +202,8 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
     bool valid = false;
     Solution solution(model_.numberOfVariables());
 
+    std::chrono::duration<double> total_solve_time(0);
+
     do
     {
         ++iterCount;
@@ -213,23 +214,21 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
 
 
         std::cout << "Add " << newDivisionIDs.size() << " Division Constraints with IDs: " << std::endl;
-        start = std::chrono::system_clock::now();
         for(auto iter : newDivisionIDs)
         {
             std::cout << iter << ", ";
             segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
             segmentationHypotheses_[iter].addMergerConstraints(model_, settings_);
         }
-        end = std::chrono::system_clock::now();
         std::cout << std::endl;
 
 
         OptimizerType optimizer(model_, optimizerParam);
         OptimizerType::VerboseVisitorType optimizerVisitor;
 
-        start = std::chrono::system_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         optimizer.infer(optimizerVisitor);
-        end = std::chrono::system_clock::now();
+        end = std::chrono::high_resolution_clock::now();
 
         optimizer.arg(solution);
 
@@ -252,6 +251,7 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
 
         std::chrono::duration<double> solve_time = end - start;
         std::cout << "Solving time: " << solve_time.count() << std::endl;
+        total_solve_time += solve_time;
 
 
         newDivisionIDs = {};
@@ -277,6 +277,7 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
     while(!valid && divCountNew > divCount);
 
 
+    std::cout << "Average solving time: " << (total_solve_time / iterCount).count() << std::endl;
     std::cout << "Number of iterations: " << iterCount << std::endl;
 
     return solution;
@@ -284,7 +285,7 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
 
 Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints, bool withMergerConstrains)
 {
-    std::chrono::time_point<std::chrono::system_clock> start, end;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
@@ -297,9 +298,9 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
 	for(size_t i = 0; i < weights.size(); i++)
 		weightObject.setWeight(i, weights[i]);
 
-    start = std::chrono::system_clock::now();
+    start = std::chrono::high_resolution_clock::now();
     initializeOpenGMModel(weightObject, withDivisionConstraints, withMergerConstrains);
-    end = std::chrono::system_clock::now();
+    end = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double> model_time = end - start;
     std::cout << "Model initializing time: " << model_time.count() << std::endl;
@@ -318,7 +319,7 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
     optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
     optimizerParam.verbose_ = settings_->optimizerVerbose_;
     optimizerParam.useSoftConstraints_ = false;
-    optimizerParam.integerConstraintNodeVar_ = true;
+    optimizerParam.integerConstraintNodeVar_ = withIntegerConstraints;
     optimizerParam.epGap_ = settings_->optimizerEpGap_;
     optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
 
@@ -327,9 +328,9 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
     Solution solution(model_.numberOfVariables());
     OptimizerType::VerboseVisitorType optimizerVisitor;
 
-    start = std::chrono::system_clock::now();
+    start = std::chrono::high_resolution_clock::now();
     optimizer.infer(optimizerVisitor);
-    end = std::chrono::system_clock::now();
+    end = std::chrono::high_resolution_clock::now();
 
     optimizer.arg(solution);
 
