@@ -29,13 +29,9 @@ public:
 	size_t computeNumWeights();
 
     /**
-     * @brief Find the solution starting without division constraints and adding them gradually
+     * @brief Find the solution starting without division and merger constraints and adding them gradually
      */
-	helpers::Solution relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true);
-
-	helpers::Solution inferWithNewConstraints(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true, const std::set<int>& divisionIDs = {});
-
-	helpers::Solution integerRelaxedInfer(const std::vector<helpers::ValueType>& weights);
+	helpers::Solution inferWithCuttingConstraints(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints = true);
 
 	/**
 	 * @brief Find the minimal-energy configuration using an ILP

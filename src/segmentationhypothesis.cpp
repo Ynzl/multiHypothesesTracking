@@ -362,6 +362,11 @@ void SegmentationHypothesis::addToOpenGMModel(
 	}
 }
 
+void SegmentationHypothesis::addDivisionConstraint(helpers::GraphicalModelType& model, bool requireSeparateChildren)
+{
+    addDivisionConstraintToOpenGM(model, requireSeparateChildren);
+}
+
 void SegmentationHypothesis::addMergerConstraints(helpers::GraphicalModelType& model, std::shared_ptr<helpers::Settings> settings)
 {
     // std::cout << "Add Merger Constraints" << std::endl;

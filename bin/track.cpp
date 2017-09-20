@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include <boost/program_options.hpp>
 
@@ -23,7 +24,7 @@ int main(int argc, char** argv) {
 	    ("weights,w", po::value<std::string>(&weightsFilename), "filename of the weights stored as Json file")
 	    ("output,o", po::value<std::string>(&outputFilename), "filename where the resulting tracking (as links) will be stored as Json file")
 		("lp-relax", "run LP relaxation")
-        ("relax-division-constraints,d", "add division constraints gradually")
+        ("cutting-constraints,c", "cut division and merger constraints")
 	;
 
 	po::variables_map variableMap;
@@ -44,30 +45,27 @@ int main(int argc, char** argv) {
 	else
 	{
 		bool withIntegerConstraints = variableMap.count("lp-relax") == 0;
-		bool withAllDivisionConstraints = variableMap.count("relax-division-constraints") == 0;
+		bool withAllConstraints = variableMap.count("cutting-constraints") == 0;
 
+        JsonModel model;
+        model.readFromJson(modelFilename);
+        std::vector<double> weights = readWeightsFromJson(weightsFilename);
+        Solution solution;
 
-        if(withAllDivisionConstraints)
+        std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+        if(withAllConstraints)
         {
-            JsonModel model;
-            model.readFromJson(modelFilename);
-            std::vector<double> weights = readWeightsFromJson(weightsFilename);
-            Solution solution = model.infer(weights, withIntegerConstraints);
-            model.saveResultToJson(outputFilename, solution);
+            solution = model.infer(weights, withIntegerConstraints);
         }
         else
         {
-            std::cout << "Relax on division constraints..." << std::endl;
-
-            JsonModel model;
-            model.readFromJson(modelFilename);
-            std::vector<double> weights = readWeightsFromJson(weightsFilename);
-            Solution solution = {};
-            if(withIntegerConstraints)
-                solution = model.integerRelaxedInfer(weights);
-            else
-                solution = model.relaxedInfer(weights, withIntegerConstraints);
-            model.saveResultToJson(outputFilename, solution);
+            solution = model.inferWithCuttingConstraints(weights, withIntegerConstraints);
         }
+        std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
+
+        std::chrono::duration<double> tracking_time = end - start;
+        std::cout << "Finished tracking in " << tracking_time.count() << " secs" << std::endl;
+
+        model.saveResultToJson(outputFilename, solution);
 	}
 }

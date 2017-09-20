@@ -141,10 +141,7 @@ public: // API
 	size_t getNumActiveOutgoingLinks(const helpers::Solution& sol) const;
 
 
-	void addDivisionConstraint(helpers::GraphicalModelType& model, bool requireSeparateChildren)
-    {
-        addDivisionConstraintToOpenGM(model, requireSeparateChildren);
-    }
+	void addDivisionConstraint(helpers::GraphicalModelType& model, bool requireSeparateChildren);
 
 	void addMergerConstraints(helpers::GraphicalModelType& model, std::shared_ptr<helpers::Settings> settings);
 

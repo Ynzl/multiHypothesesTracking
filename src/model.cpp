@@ -154,62 +154,9 @@ void Model::initializeOpenGMModel(WeightsType& weights, bool withDivisionConstra
 	std::cout << "Model has " << numIndicatorVars << " indicator variables" << std::endl;
 }
 
-
-Solution Model::relaxedInfer(const std::vector<helpers::ValueType>& weights, bool withIntegerConstraints)
+Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weights, bool withIntegerConstraints)
 {
-    // std::cout << "Relax on division constraints..." << std::endl;
-
-    std::set<int> divisionIDs = {};
-    std::set<int> newDivisionIDs = {};
-    unsigned int iterCount = 1;
-    unsigned int divCount = 0;
-    unsigned int divCountNew = 0;
-
-    std::cout << "Iteration number 1: Solving without any division constraints..." << std::endl;
-    Solution solution = infer(weights, withIntegerConstraints, false, false);
-    bool valid = verifySolution(solution, newDivisionIDs);
-
-    divisionIDs = newDivisionIDs;
-    divCountNew = divisionIDs.size();
-
-    std::cout << "divCount: " << divCount << std::endl;
-    std::cout << "divCountNew: " << divCountNew << std::endl;
-
-    std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
-
-
-    while(!valid && divCountNew > divCount)
-    {
-        ++iterCount;
-        divCount = divisionIDs.size();
-
-        std::cout << "Iteration number " << iterCount << std::endl;
-
-        solution = inferWithNewConstraints(weights, withIntegerConstraints, newDivisionIDs);
-
-        newDivisionIDs = {};
-        valid = verifySolution(solution, newDivisionIDs);
-
-        divisionIDs.insert(newDivisionIDs.begin(), newDivisionIDs.end());
-        divCountNew = divisionIDs.size();
-
-        std::cout << "divCount: " << divCount << std::endl;
-        std::cout << "divCountNew: " << divCountNew << std::endl;
-
-        std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
-    }
-
-
-    std::cout << "Number of iterations: " << iterCount << std::endl;
-    std::cout << "Found valid solution? " << (valid? "yes" : "no") << std::endl;
-
-    return solution;
-}
-
-
-Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, bool withIntegerConstraints, const std::set<int>& divisionIDs)
-{
-    std::chrono::time_point<std::chrono::system_clock> start, end;
+    std::cout << "Infer with Cutting Constraints..." << std::endl;
 
 	// use weights that were given
 	WeightsType weightObject(computeNumWeights());
@@ -222,120 +169,8 @@ Solution Model::inferWithNewConstraints(const std::vector<ValueType>& weights, b
 	for(size_t i = 0; i < weights.size(); i++)
 		weightObject.setWeight(i, weights[i]);
 
-    std::cout << "Add " << divisionIDs.size() << " Division Constraints with IDs: " << std::endl;
-    start = std::chrono::system_clock::now();
-    for(auto iter : divisionIDs)
-    {
-        std::cout << iter << ", ";
-        segmentationHypotheses_[iter].addDivisionConstraint(model_, settings_->requireSeparateChildrenOfDivision_);
-        segmentationHypotheses_[iter].addMergerConstraints(model_, settings_);
-    }
-    end = std::chrono::system_clock::now();
-    std::cout << std::endl;
-
-    std::chrono::duration<double> model_time = end - start;
-    std::cout << "Adding to model time: " << model_time.count() << std::endl;
-
-	if(withIntegerConstraints)
-	{
-#ifdef WITH_CPLEX
-		std::cout << "Using cplex optimizer" << std::endl;
-		typedef opengm::LPCplex2<GraphicalModelType, opengm::Minimizer> OptimizerType;
-#else
-		std::cout << "Using gurobi optimizer" << std::endl;
-		typedef opengm::LPGurobi2<GraphicalModelType, opengm::Minimizer> OptimizerType;
-#endif
-		OptimizerType::Parameter optimizerParam;
-		optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
-		optimizerParam.verbose_ = settings_->optimizerVerbose_;
-		optimizerParam.useSoftConstraints_ = false;
-		optimizerParam.integerConstraintNodeVar_ = true;
-		optimizerParam.epGap_ = settings_->optimizerEpGap_;
-		optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
-
-		OptimizerType optimizer(model_, optimizerParam);
-
-		Solution solution(model_.numberOfVariables());
-		OptimizerType::VerboseVisitorType optimizerVisitor;
-
-        start = std::chrono::system_clock::now();
-		optimizer.infer(optimizerVisitor);
-        end = std::chrono::system_clock::now();
-
-		optimizer.arg(solution);
-		std::cout << "solution has energy: " << optimizer.value() << std::endl;
-		foundSolutionValue_ = optimizer.value();
-
-        std::chrono::duration<double> solve_time = end - start;
-        std::cout << "Solving time: " << solve_time.count() << std::endl;
-
-		return solution;
-	}
-	else
-	{
-#ifdef WITH_CPLEX
-		std::cout << "Using cplex optimizer" << std::endl;
-		typedef opengm::LPCplex<GraphicalModelType, opengm::Minimizer> OptimizerType;
-#else
-		std::cout << "Using gurobi optimizer" << std::endl;
-		typedef opengm::LPGurobi<GraphicalModelType, opengm::Minimizer> OptimizerType;
-#endif
-		OptimizerType::Parameter optimizerParam;
-		optimizerParam.verbose_ = settings_->optimizerVerbose_;
-		optimizerParam.integerConstraint_ = false;
-		optimizerParam.epGap_ = settings_->optimizerEpGap_;
-		optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
-
-		OptimizerType optimizer(model_, optimizerParam);
-
-		Solution solution(model_.numberOfVariables());
-		OptimizerType::VerboseVisitorType optimizerVisitor;
-
-        start = std::chrono::system_clock::now();
-		optimizer.infer(optimizerVisitor);
-        end = std::chrono::system_clock::now();
-
-		optimizer.arg(solution);
-
-		// for(size_t i = 0; i < solution.size(); i++)
-        // {
-            // opengm::IndependentFactor<double, size_t, size_t> values;
-            // optimizer.variable(i, values);
-            // std::cout << "Variable " << i << ": ";
-            // for(size_t state = 0; state < model_.numberOfLabels(i); state++)
-            // {
-                // std::cout << "(" << state << ")=" << values(state) << " ";
-            // }
-            // std::cout << std::endl;
-        // }
-
-		std::cout << "solution has energy: " << optimizer.value() << std::endl;
-		foundSolutionValue_ = optimizer.value();
-
-        std::chrono::duration<double> solve_time = end - start;
-        std::cout << "Solving time: " << solve_time.count() << std::endl;
-
-		return solution;
-	}
-}
-
-Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights)
-{
-    std::cout << "FANCY" << std::endl;
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
-
-	// use weights that were given
-	WeightsType weightObject(computeNumWeights());
-	assert(weights.size() == weightObject.numberOfWeights());
-	if(weights.size() != weightObject.numberOfWeights())
-	{
-		std::cout << "Provided length of vector with initial weights has wrong length!" << std::endl;
-		throw std::runtime_error("Provided length of vector with initial weights has wrong length!");
-	}
-	for(size_t i = 0; i < weights.size(); i++)
-		weightObject.setWeight(i, weights[i]);
-
     start = std::chrono::system_clock::now();
     initializeOpenGMModel(weightObject, false, false);
     end = std::chrono::system_clock::now();
@@ -351,12 +186,11 @@ Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights)
     std::cout << "Using gurobi optimizer" << std::endl;
     typedef opengm::LPGurobi2<GraphicalModelType, opengm::Minimizer> OptimizerType;
 #endif
-
     OptimizerType::Parameter optimizerParam;
     optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
     optimizerParam.verbose_ = settings_->optimizerVerbose_;
     optimizerParam.useSoftConstraints_ = false;
-    optimizerParam.integerConstraintNodeVar_ = true;
+    optimizerParam.integerConstraintNodeVar_ = withIntegerConstraints;
     optimizerParam.epGap_ = settings_->optimizerEpGap_;
     optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
 
@@ -367,7 +201,7 @@ Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights)
     unsigned int divCount = 0;
     unsigned int divCountNew = 0;
     bool valid = false;
-    Solution sol = {};
+    Solution solution(model_.numberOfVariables());
 
     do
     {
@@ -375,6 +209,7 @@ Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights)
         divCount = divisionIDs.size();
 
         std::cout << "Iteration number " << iterCount << std::endl;
+        std::cout << (withIntegerConstraints ? "With" : "Without") << " integer constraint" << std::endl;
 
 
         std::cout << "Add " << newDivisionIDs.size() << " Division Constraints with IDs: " << std::endl;
@@ -390,8 +225,6 @@ Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights)
 
 
         OptimizerType optimizer(model_, optimizerParam);
-
-        Solution solution(model_.numberOfVariables());
         OptimizerType::VerboseVisitorType optimizerVisitor;
 
         start = std::chrono::system_clock::now();
@@ -399,6 +232,21 @@ Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights)
         end = std::chrono::system_clock::now();
 
         optimizer.arg(solution);
+
+
+        size_t numIntegralVariables = 0;
+        for(size_t i = 0; i < solution.size(); i++)
+        {
+            opengm::IndependentFactor<double, size_t, size_t> values;
+            optimizer.variable(i, values);
+            double v = values(solution[i]);
+            if(v == 0.0 || v == 1.0)
+                numIntegralVariables++;
+        }
+        std::cout << numIntegralVariables << " variables of " << model_.numberOfVariables() << " are integral! "
+                << 100.0 * float(numIntegralVariables) / model_.numberOfVariables() << "%" << std::endl;
+
+
         std::cout << "solution has energy: " << optimizer.value() << std::endl;
         foundSolutionValue_ = optimizer.value();
 
@@ -417,15 +265,22 @@ Solution Model::integerRelaxedInfer(const std::vector<ValueType>& weights)
 
         std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
 
-        sol = solution;
+        // if(!valid && !withIntegerConstraints && divCountNew == divCount)
+        // {
+        //     std::cout << "Try again with integer constraint!" << std::endl;
+        //     optimizerParam.integerConstraintNodeVar_ = true;
+        //     withIntegerConstraints = true;
+        //     divCount = 0;
+        // }
+
     }
     while(!valid && divCountNew > divCount);
 
+
     std::cout << "Number of iterations: " << iterCount << std::endl;
 
-    return sol;
+    return solution;
 }
-
 
 Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerConstraints, bool withDivisionConstraints, bool withMergerConstrains)
 {
@@ -447,91 +302,56 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
     end = std::chrono::system_clock::now();
 
     std::chrono::duration<double> model_time = end - start;
-    std::cout << "Modeling time: " << model_time.count() << std::endl;
+    std::cout << "Model initializing time: " << model_time.count() << std::endl;
 
 
-	if(withIntegerConstraints)
-	{
 #ifdef WITH_CPLEX
-		std::cout << "Using cplex optimizer" << std::endl;
-		typedef opengm::LPCplex2<GraphicalModelType, opengm::Minimizer> OptimizerType;
+    std::cout << "Using cplex optimizer" << std::endl;
+    typedef opengm::LPCplex2<GraphicalModelType, opengm::Minimizer> OptimizerType;
 #else
-		std::cout << "Using gurobi optimizer" << std::endl;
-		typedef opengm::LPGurobi2<GraphicalModelType, opengm::Minimizer> OptimizerType;
+    std::cout << "Using gurobi optimizer" << std::endl;
+    typedef opengm::LPGurobi2<GraphicalModelType, opengm::Minimizer> OptimizerType;
 #endif
+    std::cout << (withIntegerConstraints ? "With" : "Without") << " integer constraint" << std::endl;
 
-		OptimizerType::Parameter optimizerParam;
-		optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
-		optimizerParam.verbose_ = settings_->optimizerVerbose_;
-		optimizerParam.useSoftConstraints_ = false;
-		optimizerParam.integerConstraintNodeVar_ = true;
-		optimizerParam.epGap_ = settings_->optimizerEpGap_;
-		optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
+    OptimizerType::Parameter optimizerParam;
+    optimizerParam.relaxation_ = OptimizerType::Parameter::TightPolytope;
+    optimizerParam.verbose_ = settings_->optimizerVerbose_;
+    optimizerParam.useSoftConstraints_ = false;
+    optimizerParam.integerConstraintNodeVar_ = true;
+    optimizerParam.epGap_ = settings_->optimizerEpGap_;
+    optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
 
-		OptimizerType optimizer(model_, optimizerParam);
+    OptimizerType optimizer(model_, optimizerParam);
 
-		Solution solution(model_.numberOfVariables());
-		OptimizerType::VerboseVisitorType optimizerVisitor;
+    Solution solution(model_.numberOfVariables());
+    OptimizerType::VerboseVisitorType optimizerVisitor;
 
-        start = std::chrono::system_clock::now();
-		optimizer.infer(optimizerVisitor);
-        end = std::chrono::system_clock::now();
+    start = std::chrono::system_clock::now();
+    optimizer.infer(optimizerVisitor);
+    end = std::chrono::system_clock::now();
 
-		optimizer.arg(solution);
-		std::cout << "solution has energy: " << optimizer.value() << std::endl;
-		foundSolutionValue_ = optimizer.value();
+    optimizer.arg(solution);
 
-        std::chrono::duration<double> solve_time = end - start;
-        std::cout << "Solving time: " << solve_time.count() << std::endl;
+    size_t numIntegralVariables = 0;
+    for(size_t i = 0; i < solution.size(); i++)
+    {
+        opengm::IndependentFactor<double, size_t, size_t> values;
+        optimizer.variable(i, values);
+        double v = values(solution[i]);
+        if(v == 0.0 || v == 1.0)
+            numIntegralVariables++;
+    }
+    std::cout << numIntegralVariables << " variables of " << model_.numberOfVariables() << " are integral! "
+            << 100.0 * float(numIntegralVariables) / model_.numberOfVariables() << "%" << std::endl;
 
-		return solution;
-	}
-	else
-	{
-#ifdef WITH_CPLEX
-		std::cout << "Using cplex optimizer" << std::endl;
-		typedef opengm::LPCplex<GraphicalModelType, opengm::Minimizer> OptimizerType;
-#else
-		std::cout << "Using gurobi optimizer" << std::endl;
-		typedef opengm::LPGurobi<GraphicalModelType, opengm::Minimizer> OptimizerType;
-#endif
-		OptimizerType::Parameter optimizerParam;
-		optimizerParam.verbose_ = settings_->optimizerVerbose_;
-		optimizerParam.integerConstraint_ = false;
-		optimizerParam.epGap_ = settings_->optimizerEpGap_;
-		optimizerParam.numberOfThreads_ = settings_->optimizerNumThreads_;
+    std::cout << "solution has energy: " << optimizer.value() << std::endl;
+    foundSolutionValue_ = optimizer.value();
 
-		OptimizerType optimizer(model_, optimizerParam);
+    std::chrono::duration<double> solve_time = end - start;
+    std::cout << "Solving time: " << solve_time.count() << std::endl;
 
-		Solution solution(model_.numberOfVariables());
-		OptimizerType::VerboseVisitorType optimizerVisitor;
-
-        start = std::chrono::system_clock::now();
-		optimizer.infer(optimizerVisitor);
-        end = std::chrono::system_clock::now();
-
-		optimizer.arg(solution);
-
-		// for(size_t i = 0; i < solution.size(); i++)
-  //       {
-  //           opengm::IndependentFactor<double, size_t, size_t> values;
-  //           optimizer.variable(i, values);
-  //           std::cout << "Variable " << i << ": ";
-  //           for(size_t state = 0; state < model_.numberOfLabels(i); state++)
-  //           {
-  //               std::cout << "(" << state << ")=" << values(state) << " ";
-  //           }
-  //           std::cout << std::endl;
-  //       }
-
-		std::cout << "solution has energy: " << optimizer.value() << std::endl;
-		foundSolutionValue_ = optimizer.value();
-
-        std::chrono::duration<double> solve_time = end - start;
-        std::cout << "Solving time: " << solve_time.count() << std::endl;
-
-		return solution;
-	}
+    return solution;
 }
 
 std::vector<ValueType> Model::learn()
