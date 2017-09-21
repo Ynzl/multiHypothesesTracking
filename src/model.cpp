@@ -229,9 +229,12 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
         start = std::chrono::high_resolution_clock::now();
         optimizer.infer(optimizerVisitor);
         end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> solve_time = end - start;
+        total_solve_time += solve_time;
 
         optimizer.arg(solution);
 
+        foundSolutionValue_ = optimizer.value();
 
         size_t numIntegralVariables = 0;
         for(size_t i = 0; i < solution.size(); i++)
@@ -246,24 +249,19 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
                 << 100.0 * float(numIntegralVariables) / model_.numberOfVariables() << "%" << std::endl;
 
 
-        std::cout << "solution has energy: " << optimizer.value() << std::endl;
-        foundSolutionValue_ = optimizer.value();
-
-        std::chrono::duration<double> solve_time = end - start;
-        std::cout << "Solving time: " << solve_time.count() << std::endl;
-        total_solve_time += solve_time;
-
-
         newDivisionIDs = {};
         valid = verifySolution(solution, newDivisionIDs);
 
         divisionIDs.insert(newDivisionIDs.begin(), newDivisionIDs.end());
         divCountNew = divisionIDs.size();
 
+        std::cout << "solution has energy: " << optimizer.value() << std::endl;
+        std::cout << "Solving time: " << solve_time.count() << std::endl;
         std::cout << "divCount: " << divCount << std::endl;
         std::cout << "divCountNew: " << divCountNew << std::endl;
-
         std::cout << "Is solution valid? " << (valid? "yes" : "no") << std::endl;
+
+        // uncomment for retry with ILP if at end of lp-relax
 
         // if(!valid && !withIntegerConstraints && divCountNew == divCount)
         // {
@@ -277,6 +275,7 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
     while(!valid && divCountNew > divCount);
 
 
+    std::cout << "Model initialization time: " << model_time.count() << std::endl;
     std::cout << "Average solving time: " << (total_solve_time / iterCount).count() << std::endl;
     std::cout << "Number of iterations: " << iterCount << std::endl;
 
@@ -301,9 +300,7 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
     start = std::chrono::high_resolution_clock::now();
     initializeOpenGMModel(weightObject, withDivisionConstraints, withMergerConstrains);
     end = std::chrono::high_resolution_clock::now();
-
     std::chrono::duration<double> model_time = end - start;
-    std::cout << "Model initializing time: " << model_time.count() << std::endl;
 
 
 #ifdef WITH_CPLEX
@@ -331,6 +328,7 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
     start = std::chrono::high_resolution_clock::now();
     optimizer.infer(optimizerVisitor);
     end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> solve_time = end - start;
 
     optimizer.arg(solution);
 
@@ -347,11 +345,10 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
             << 100.0 * float(numIntegralVariables) / model_.numberOfVariables() << "%" << std::endl;
 
     std::cout << "solution has energy: " << optimizer.value() << std::endl;
-    foundSolutionValue_ = optimizer.value();
-
-    std::chrono::duration<double> solve_time = end - start;
+    std::cout << "Model initializing time: " << model_time.count() << std::endl;
     std::cout << "Solving time: " << solve_time.count() << std::endl;
 
+    foundSolutionValue_ = optimizer.value();
     return solution;
 }
 

@@ -483,7 +483,7 @@ bool SegmentationHypothesis::verifySolution(const Solution& sol, const std::shar
 	{
 		if(sol[appearance_.getOpenGMVariableId()] > 0 && sumIncoming > 0)
 		{
-			std::cout << "At node " << id_ << ": there are active incoming transitions and active appearances!" << std::endl;
+			// std::cout << "At node " << id_ << ": there are active incoming transitions and active appearances!" << std::endl;
 			return false;
 		}
 		sumIncoming += sol[appearance_.getOpenGMVariableId()];
@@ -491,8 +491,8 @@ bool SegmentationHypothesis::verifySolution(const Solution& sol, const std::shar
 
 	if(incomingLinks_.size() > 0 && sumIncoming != ownValue)
 	{
-		std::cout << "At node " << id_ << ": incoming=" << sumIncoming << " is NOT EQUAL to " << ownValue << std::endl;
-		std::cout << "(division = " << divisionValue << ")" << std::endl;
+		// std::cout << "At node " << id_ << ": incoming=" << sumIncoming << " is NOT EQUAL to " << ownValue << std::endl;
+		// std::cout << "(division = " << divisionValue << ")" << std::endl;
 		return false;
 	}
 
@@ -504,7 +504,7 @@ bool SegmentationHypothesis::verifySolution(const Solution& sol, const std::shar
 	{
 		if(sol[disappearance_.getOpenGMVariableId()] > 0 && sumOutgoing > 0)
 		{
-			std::cout << "At node " << id_ << ": there are active outgoing transitions and active disappearances!" << std::endl;
+			// std::cout << "At node " << id_ << ": there are active outgoing transitions and active disappearances!" << std::endl;
 			return false;
 		}
 		sumOutgoing += sol[disappearance_.getOpenGMVariableId()];
@@ -512,7 +512,7 @@ bool SegmentationHypothesis::verifySolution(const Solution& sol, const std::shar
 
 	if(outgoingLinks_.size() > 0 && sumOutgoing != ownValue + divisionValue)
 	{
-		std::cout << "At node " << id_ << ": outgoing=" << sumOutgoing << " is NOT EQUAL to " << ownValue << " + " << divisionValue << " (own+div)" << std::endl;
+		// std::cout << "At node " << id_ << ": outgoing=" << sumOutgoing << " is NOT EQUAL to " << ownValue << " + " << divisionValue << " (own+div)" << std::endl;
 		return false;
 	}
 
@@ -522,7 +522,7 @@ bool SegmentationHypothesis::verifySolution(const Solution& sol, const std::shar
 	{
 		if(sol[appearance_.getOpenGMVariableId()] > 0 && sol[disappearance_.getOpenGMVariableId()] > 0)
 		{
-			std::cout << "Length one track even though it is forbidden at "<< id_ << std::endl;
+			// std::cout << "Length one track even though it is forbidden at "<< id_ << std::endl;
 			return false;
 		}
 	}
@@ -532,7 +532,7 @@ bool SegmentationHypothesis::verifySolution(const Solution& sol, const std::shar
 	// check divisions
 	if(divisionValue > ownValue)
 	{
-		std::cout << "At node " << id_ << ": division > value: " << divisionValue << " > " << ownValue << " -> INVALID!" << std::endl;
+		// std::cout << "At node " << id_ << ": division > value: " << divisionValue << " > " << ownValue << " -> INVALID!" << std::endl;
 		return false;
 	}
 
@@ -541,7 +541,7 @@ bool SegmentationHypothesis::verifySolution(const Solution& sol, const std::shar
 	// check division vs disappearance
 	if(disappearance_.getOpenGMVariableId() >= 0 && (divisionValue > 0 && sol[disappearance_.getOpenGMVariableId()] > 0))
 	{
-		std::cout << "At node " << id_ << ": division and disappearance are BOTH active -> INVALID!" << std::endl;
+		// std::cout << "At node " << id_ << ": division and disappearance are BOTH active -> INVALID!" << std::endl;
 		return false;
 	}
 
