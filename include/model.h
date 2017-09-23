@@ -70,7 +70,7 @@ public:
      * @brief check that the solution does not violate any constraints, save the IDs of segmentationHypothesis in which constraints are broken
      * @detail used by relaxedInfer
      */
-	bool verifySolution(const helpers::Solution& sol, std::set<int>& divisionIDs);
+	bool verifySolution(const helpers::Solution& sol, std::set<int>& divisionIDs) const;
 
 	/**
 	 * @brief Return the energy of the given solution vector

@@ -226,6 +226,8 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
         OptimizerType optimizer(model_, optimizerParam);
         OptimizerType::VerboseVisitorType optimizerVisitor;
 
+        // optimizer.setStartingPoint(solution);
+
         start = std::chrono::high_resolution_clock::now();
         optimizer.infer(optimizerVisitor);
         end = std::chrono::high_resolution_clock::now();
@@ -348,6 +350,15 @@ Solution Model::infer(const std::vector<ValueType>& weights, bool withIntegerCon
     std::cout << "Model initializing time: " << model_time.count() << std::endl;
     std::cout << "Solving time: " << solve_time.count() << std::endl;
 
+    // OptimizerType optimizer2(model_, optimizerParam);
+    // OptimizerType::VerboseVisitorType optimizerVisitor2;
+    // optimizer2.setStartingPoint(solution);
+    // start = std::chrono::high_resolution_clock::now();
+    // optimizer2.infer(optimizerVisitor2);
+    // end = std::chrono::high_resolution_clock::now();
+    // solve_time = end - start;
+    // std::cout << "Solving time: " << solve_time.count() << std::endl;
+
     foundSolutionValue_ = optimizer.value();
     return solution;
 }
@@ -423,7 +434,7 @@ double Model::getLastSolutionValue() const
 }
 
 // version for division constraints
-bool Model::verifySolution(const helpers::Solution& sol, std::set<int>& divisionIDs)
+bool Model::verifySolution(const helpers::Solution& sol, std::set<int>& divisionIDs) const
 {
 	std::cout << "Checking solution..." << std::endl;
 
