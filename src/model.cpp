@@ -268,11 +268,15 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
         // if(!valid && !withIntegerConstraints && divCountNew == divCount)
         // {
         //     std::cout << "Try again with integer constraint!" << std::endl;
-        //     optimizerParam.integerConstraintNodeVar_ = true;
         //     withIntegerConstraints = true;
         //     divCount = 0;
         // }
 
+        if(!withIntegerConstraints)
+        {
+            withIntegerConstraints = true;
+            optimizerParam.integerConstraintNodeVar_ = true;
+        }
     }
     while(!valid && divCountNew > divCount);
 
