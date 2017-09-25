@@ -254,6 +254,12 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
         newDivisionIDs = {};
         valid = verifySolution(solution, newDivisionIDs);
 
+        for(auto it = newDivisionIDs.begin(); it != newDivisionIDs.end(); ++it)
+        {
+            if(divisionIDs.count(*it))
+                newDivisionIDs.erase(it);
+        }
+
         divisionIDs.insert(newDivisionIDs.begin(), newDivisionIDs.end());
         divCountNew = divisionIDs.size();
 
@@ -265,18 +271,20 @@ Solution Model::inferWithCuttingConstraints(const std::vector<ValueType>& weight
 
         // uncomment for retry with ILP if at end of lp-relax
 
-        // if(!valid && !withIntegerConstraints && divCountNew == divCount)
+        if(!valid && !withIntegerConstraints && divCountNew == divCount)
+        {
+            std::cout << "Try again with integer constraint!" << std::endl;
+            withIntegerConstraints = true;
+            optimizerParam.integerConstraintNodeVar_ = true;
+            divCount = 0;
+        }
+
+        // if(!valid && !withIntegerConstraints)
         // {
         //     std::cout << "Try again with integer constraint!" << std::endl;
         //     withIntegerConstraints = true;
-        //     divCount = 0;
+        //     optimizerParam.integerConstraintNodeVar_ = true;
         // }
-
-        if(!withIntegerConstraints)
-        {
-            withIntegerConstraints = true;
-            optimizerParam.integerConstraintNodeVar_ = true;
-        }
     }
     while(!valid && divCountNew > divCount);
 
